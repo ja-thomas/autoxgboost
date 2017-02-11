@@ -1,0 +1,7 @@
+autoxgboost.Rcheck
+autoxgboost_*.tar.gz
+.Rhistory
+html
+*.sublime-*
+.Rproj.user
+
