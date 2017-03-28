@@ -14,8 +14,13 @@
 #'   Control object for mbo.
 #' @param par.set [\code{\link[ParamHelpers]{ParamSet}}]\cr
 #'   Parameter set.
+#' @param max.nrounds [\code{integer(1L)}]\cr
+#'   Maximum number of allowed iterations. Default is \code{10^6}.
+#' @param early_stopping_rounds [\code{integer(1L}]\cr
+#'   After how many iterations without an improvement in the OOB error should be stopped?
+#'   Default is 10.
 #' @export
-autoxgboost = function(task, measure, control, par.set = autoxgbparset) {
+autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6, early_stopping_rounds = 10L) {
 
   tt = getTaskType(task)
 
@@ -26,20 +31,21 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset) {
     objective = "binary:logistic"
     eval_metric = "error"
 
-    #FIXME: Magic Numbers
     baseLearner = makeLearner("classif.autoxgboost", predict.type = predict.type,
-    eval_metric = eval_metric, objective = objective, early_stopping_rounds = 10L)
+      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early_stopping_rounds,
+      max.nrounds = max.nrounds)
 
   } else if (tt == "regr") {
 
     objective = "reg:linear"
     eval_metric = "rmse"
-    #FIXME: Magic Numbers
+
     baseLearner = makeLearner("regr.autoxgboost",
-    eval_metric = eval_metric, objective = objective, early_stopping_rounds = 10L)
+      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early_stopping_rounds,
+      max.nrounds = max.nrounds)
 
   } else {
-    stopf("Task must be regression or classification, but is %s", tt)
+    stop("Task must be regression or classification")
   }
 
 

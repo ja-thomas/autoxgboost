@@ -4,7 +4,8 @@
 \alias{autoxgboost}
 \title{Fit and optimize a xgboost model.}
 \usage{
-autoxgboost(task, measure, control, par.set = autoxgbparset)
+autoxgboost(task, measure, control, par.set = autoxgbparset,
+  max.nrounds = 10^6, early_stopping_rounds = 10L)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -18,6 +19,13 @@ Control object for mbo.}
 
 \item{par.set}{[\code{\link[ParamHelpers]{ParamSet}}]\cr
 Parameter set.}
+
+\item{max.nrounds}{[\code{integer(1L)}]\cr
+Maximum number of allowed iterations. Default is \code{10^6}.}
+
+\item{early_stopping_rounds}{[\code{integer(1L}]\cr
+After how many iterations without an improvement in the OOB error should be stopped?
+Default is 10.}
 }
 \description{
 An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).

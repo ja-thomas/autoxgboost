@@ -20,17 +20,18 @@ makeRLearner.classif.autoxgboost = function() {
       makeUntypedLearnerParam(id = "objective", default = "binary:logistic", tunable = FALSE),
       makeUntypedLearnerParam(id = "eval_metric", default = "error", tunable = FALSE),
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
-      makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE)
+      makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
+      makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L)
     ),
     properties = c("twoclass", "multiclass", "numerics", "prob", "weights"),
     name = "eXtreme Gradient Boosting",
     short.name = "autoxgboost",
-    note = "All settings are passed directly, rather than through `xgboost`'s `params` argument. `nrounds` has been set to `1` and `verbose` to `0` by default. `num_class` is set internally, so do not set this manually."
+    note = ""
   )
 }
 
 #' @export
-trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights = NULL, objective, eval_metric, early_stopping_rounds, ...) {
+trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights = NULL, objective, eval_metric, early_stopping_rounds, max.nrounds, ...) {
 
   td = getTaskDesc(.task)
   nc = length(td$class.levels)
@@ -57,7 +58,7 @@ trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights =
   if (.learner$predict.type == "prob" && objective == "multi:softmax")
     stop("objective = 'multi:softmax' does not work with predict.type = 'prob'")
 
-  mod = xgboost::xgb.train(params = parlist, data = data, nrounds = 10^2, watchlist = watchlist,
+  mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
     objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
 
   mod$test.inds = test.inds
