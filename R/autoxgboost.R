@@ -14,13 +14,24 @@
 #'   Control object for mbo.
 #' @param par.set [\code{\link[ParamHelpers]{ParamSet}}]\cr
 #'   Parameter set.
-#' @param max.nrounds [\code{integer(1L)}]\cr
+#' @param max.nrounds [\code{integer(1)}]\cr
 #'   Maximum number of allowed iterations. Default is \code{10^6}.
-#' @param early_stopping_rounds [\code{integer(1L}]\cr
+#' @param early.stopping.rounds [\code{integer(1L}]\cr
 #'   After how many iterations without an improvement in the OOB error should be stopped?
 #'   Default is 10.
+#' @param build.final.model [\code{character(1)}]\cr
+#'   Should the best found model be fitted on the complete dataset?
+#'   Options are:
+#'   \descibe{
+#'     \item{"model.only"}{A fitted xgboost model based on the best found configuration is returned.}
+#'     \item{"optim.result.only"}{The optimization result is returned.}
+#'     \item{"both"}{Both, model and optimization result are returned as a list.}
+#'   }
+#'   Default is \code{"model.only"}.
+#' @return Special: See \code{build.final.model}
 #' @export
-autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6, early_stopping_rounds = 10L) {
+autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6,
+  early.stopping.rounds = 10L, build.final.model = "model.only") {
 
   tt = getTaskType(task)
   td = getTaskDesc(task)
@@ -32,7 +43,7 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
     baseLearner = makeLearner("classif.autoxgboost", predict.type = predict.type,
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early_stopping_rounds,
+      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
       max.nrounds = max.nrounds)
 
   } else if (tt == "regr") {
@@ -41,7 +52,7 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
     eval_metric = "rmse"
 
     baseLearner = makeLearner("regr.autoxgboost",
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early_stopping_rounds,
+      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
       max.nrounds = max.nrounds)
 
   } else {
@@ -69,6 +80,21 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
   des = generateDesign(n = 15, par.set)
   des$subsample = runif(15, 0.5, 0.55)
 
-  mbo(fun = opt, control = control, design = des)
+  optim.result = mbo(fun = opt, control = control, design = des)
+
+  if (build.final.model != "optim.result.only") {
+
+    lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
+    mod = train(lrn, task)
+
+    if (build.final.model == "model.only") {
+      return(mod)
+    } else {
+      return(list(model = mod, optim.result = optim.result))
+    }
+
+  } else {
+    return(optim.result)
+  }
 
 }
