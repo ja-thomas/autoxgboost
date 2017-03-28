@@ -15,4 +15,10 @@ test_that("autoxgboost",  {
   extras = names(r$opt.path$env$extra[[11]])
   expect_subset("nrounds", extras)
 
+  #check regression with factor
+  r = autoxgboost(subsetTask(bh.task, subset = 1:50), mse, control = ctrl, max.nrounds = 10L)
+
+  extras = names(r$opt.path$env$extra[[11]])
+  expect_subset("nrounds", extras)
+
 })

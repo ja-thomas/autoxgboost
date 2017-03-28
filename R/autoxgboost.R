@@ -23,6 +23,7 @@
 autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6, early_stopping_rounds = 10L) {
 
   tt = getTaskType(task)
+  td = getTaskDesc(task)
 
   if (tt == "classif") {
 
@@ -47,6 +48,9 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
   } else {
     stop("Task must be regression or classification")
   }
+
+  if (sum(td$n.feat[c("factors", "ordered")]) > 0)
+    task = createDummyFeatures(task)
 
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
