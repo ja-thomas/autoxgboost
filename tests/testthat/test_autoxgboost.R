@@ -6,7 +6,10 @@ test_that("autoxgboost",  {
   r = autoxgboost(sonar.task, mmce, control = ctrl, max.nrounds = 10L)
 
   extras = names(r$opt.path$env$extra[[11]])
+  expect_subset("nrounds", extras)
 
+  r = autoxgboost(iris.task, mmce, control = ctrl)
+  extras = names(r$opt.path$env$extra[[11]])
   expect_subset("nrounds", extras)
 
   #check regression

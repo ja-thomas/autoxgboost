@@ -58,6 +58,9 @@ trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights =
   if (.learner$predict.type == "prob" && objective == "multi:softmax")
     stop("objective = 'multi:softmax' does not work with predict.type = 'prob'")
 
+  if (objective %in% c("multi:softprob", "multi:softmax"))
+    parlist$num_class = nc
+
   mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
     objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
 

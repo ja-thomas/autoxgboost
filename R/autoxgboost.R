@@ -27,10 +27,9 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
 
   if (tt == "classif") {
 
-    prob = "req.pred" %in% measure$properties
-    predict.type = ifelse(prob, "prob", "response")
-    objective = "binary:logistic"
-    eval_metric = "error"
+    predict.type = ifelse("req.pred" %in% measure$properties, "prob", "response")
+    objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
+    eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
     baseLearner = makeLearner("classif.autoxgboost", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early_stopping_rounds,
