@@ -66,6 +66,10 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
 
     }, par.set = par.set, noisy = TRUE, has.simple.signature = FALSE, minimize = measure$minimize)
 
-  mbo(fun = opt, control = control)
+
+  des = generateDesign(n = 15, par.set)
+  des$subsample = runif(15, 0.5, 0.55)
+
+  mbo(fun = opt, control = control, design = des)
 
 }
