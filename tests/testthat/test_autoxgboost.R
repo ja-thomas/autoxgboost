@@ -12,4 +12,7 @@ test_that("autoxgboost",  {
   #check regression
   r = autoxgboost(subsetTask(bh.task, subset = 1:50, features = c(1:3, 5:12)), mse, control = ctrl)
 
+  extras = names(r$opt.path$env$extra[[11]])
+  expect_subset("nrounds", extras)
+
 })
