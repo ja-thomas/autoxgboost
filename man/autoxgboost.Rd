@@ -2,7 +2,7 @@
 % Please edit documentation in R/autoxgboost.R
 \name{autoxgboost}
 \alias{autoxgboost}
-\title{Fit and optimize a xgboost model}
+\title{Fit and optimize a xgboost model.}
 \usage{
 autoxgboost(task, measure, control, par.set = autoxgbparset)
 }
@@ -20,6 +20,8 @@ Control object for mbo.}
 Parameter set.}
 }
 \description{
-FIXME: ToDo
+An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).
+The bounds of parameter in which the model is optimized, is defined by \code{autoxgbparset}.
+For the optimization itself bayesian optimization with \pkg{mlrMBO} is used.
 }
 
