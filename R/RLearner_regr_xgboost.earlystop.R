@@ -4,8 +4,6 @@ makeRLearner.regr.xgboost.earlystop = function() {
     cl = "regr.xgboost.earlystop",
     package = "xgboost",
     par.set = makeParamSet(
-      # we pass all of what goes in 'params' directly to ... of xgboost
-      # makeUntypedLearnerParam(id = "params", default = list()),
       makeNumericLearnerParam(id = "eta", default = 0.3, lower = 0, upper = 1),
       makeNumericLearnerParam(id = "gamma", default = 0, lower = 0),
       makeIntegerLearnerParam(id = "max_depth", default = 6L, lower = 1L),
