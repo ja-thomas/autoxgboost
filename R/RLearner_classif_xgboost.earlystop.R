@@ -1,4 +1,4 @@
-##'@export
+#'@export
 makeRLearner.classif.xgboost.earlystop = function() {
   makeRLearnerClassif(
     cl = "classif.xgboost.earlystop",
