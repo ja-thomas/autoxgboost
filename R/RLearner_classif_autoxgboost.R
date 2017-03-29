@@ -1,7 +1,7 @@
-#'@export
-makeRLearner.classif.autoxgboost = function() {
+##'@export
+makeRLearner.classif.xgboost.earlystop = function() {
   makeRLearnerClassif(
-    cl = "classif.autoxgboost",
+    cl = "classif.xgboost.earlystop",
     package = "xgboost",
     par.set = makeParamSet(
       # we pass all of what goes in 'params' directly to ... of xgboost
@@ -21,24 +21,25 @@ makeRLearner.classif.autoxgboost = function() {
       makeUntypedLearnerParam(id = "eval_metric", default = "error", tunable = FALSE),
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
-      makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L)
+      makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
+      makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5)
     ),
     properties = c("twoclass", "multiclass", "numerics", "prob", "weights"),
     name = "eXtreme Gradient Boosting",
-    short.name = "autoxgboost",
+    short.name = "xgboost.earlystop",
     note = ""
   )
 }
 
 #' @export
-trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights = NULL, objective, eval_metric, early_stopping_rounds, max.nrounds, ...) {
+trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL, objective, eval_metric, early_stopping_rounds, max.nrounds, early.stopping.fraction = 4/5, ...) {
 
   td = getTaskDesc(.task)
   nc = length(td$class.levels)
   parlist = list(...)
   parlist$eval_metric = eval_metric
 
-  rdesc = makeResampleDesc("Holdout", stratify = TRUE, split = 4/5)
+  rdesc = makeResampleDesc("Holdout", stratify = TRUE, split = early.stopping.fraction)
   rinst = makeResampleInstance(rdesc, .task)
   train.inds = rinst$train.inds[[1]]
   test.inds = rinst$test.inds[[1]]
@@ -70,7 +71,7 @@ trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights =
 }
 
 #' @export
-predictLearner.classif.autoxgboost = function(.learner, .model, .newdata, ...) {
+predictLearner.classif.xgboost.earlystop = function(.learner, .model, .newdata, ...) {
   td = .model$task.desc
   m = .model$learner.model
   cls = td$class.levels

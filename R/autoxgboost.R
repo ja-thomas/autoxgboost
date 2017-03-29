@@ -28,10 +28,13 @@
 #'     \item{"both"}{Both, model and optimization result are returned as a list.}
 #'   }
 #'   Default is \code{"model.only"}.
+#' @param early.stopping.fraction [\code{numeric(1)}]\cr
+#'   What fraction of the data should be used for early stopping (i.e. as a validation set).
+#'   Default is \code{4/5}.
 #' @return Special: See \code{build.final.model}
 #' @export
 autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6,
-  early.stopping.rounds = 10L, build.final.model = "model.only") {
+  early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = "model.only") {
 
   tt = getTaskType(task)
   td = getTaskDesc(task)
@@ -42,18 +45,18 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
-    baseLearner = makeLearner("classif.autoxgboost", predict.type = predict.type,
+    baseLearner = makeLearner("classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds)
+      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
 
   } else if (tt == "regr") {
 
     objective = "reg:linear"
     eval_metric = "rmse"
 
-    baseLearner = makeLearner("regr.autoxgboost",
+    baseLearner = makeLearner("regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds)
+      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
 
   } else {
     stop("Task must be regression or classification")

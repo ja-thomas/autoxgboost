@@ -5,7 +5,8 @@
 \title{Fit and optimize a xgboost model.}
 \usage{
 autoxgboost(task, measure, control, par.set = autoxgbparset,
-  max.nrounds = 10^6, early_stopping_rounds = 10L)
+  max.nrounds = 10^6, early.stopping.rounds = 10L,
+  early.stopping.fraction = 4/5, build.final.model = "model.only")
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -20,12 +21,29 @@ Control object for mbo.}
 \item{par.set}{[\code{\link[ParamHelpers]{ParamSet}}]\cr
 Parameter set.}
 
-\item{max.nrounds}{[\code{integer(1L)}]\cr
+\item{max.nrounds}{[\code{integer(1)}]\cr
 Maximum number of allowed iterations. Default is \code{10^6}.}
 
-\item{early_stopping_rounds}{[\code{integer(1L}]\cr
+\item{early.stopping.rounds}{[\code{integer(1L}]\cr
 After how many iterations without an improvement in the OOB error should be stopped?
 Default is 10.}
+
+\item{early.stopping.fraction}{[\code{numeric(1)}]\cr
+What fraction of the data should be used for early stopping (i.e. as a validation set).
+Default is \code{4/5}.}
+
+\item{build.final.model}{[\code{character(1)}]\cr
+Should the best found model be fitted on the complete dataset?
+Options are:
+\descibe{
+  \item{"model.only"}{A fitted xgboost model based on the best found configuration is returned.}
+  \item{"optim.result.only"}{The optimization result is returned.}
+  \item{"both"}{Both, model and optimization result are returned as a list.}
+}
+Default is \code{"model.only"}.}
+}
+\value{
+Special: See \code{build.final.model}
 }
 \description{
 An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).
