@@ -1,10 +1,10 @@
 #' @export
-makeRLearner.classif.autoxgboost = function() {
-  makeRLearnerClassif(
-    cl = "classif.autoxgboost",
+makeRLearner.regr.autoxgboost = function() {
+  makeRLearnerRegr(
+    cl = "regr.autoxgboost",
     package = "autoxgboost",
     par.set = makeParamSet(
-      makeUntypedLearnerParam(id = "measure", default = mmce),
+      makeUntypedLearnerParam(id = "measure", default = mse),
       makeUntypedLearnerParam(id = "control"),
       makeUntypedLearnerParam(id = "par.set", default = autoxgbparset),
       makeIntegerLearnerParam(id = "max.nrounds", lower = 1L, default = 10L^6),
@@ -14,7 +14,7 @@ makeRLearner.classif.autoxgboost = function() {
       makeIntegerLearnerParam(id = "design.size", lower = 1L, default = 15L),
       makeNumericVectorLearnerParam(id = "initial.subsample.range", len = 2, lower = c(0,0), upper = c(1,1), default = c(0.5, 0.55))
     ),
-    properties = c("twoclass", "multiclass", "numerics", "prob", "weights"),
+    properties = c("numerics", "weights"),
     name = "Automatic eXtreme Gradient Boosting",
     short.name = "autoxgboost",
     note = ""
@@ -22,8 +22,8 @@ makeRLearner.classif.autoxgboost = function() {
 }
 
 #' @export
-trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
-  measure = mmce, control, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
+trainLearner.regr.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
+  measure = mse, control, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = "model.only", design.size = 15L,
   initial.subsample.range = c(0.5, 0.55)) {
 
@@ -33,7 +33,7 @@ trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights =
 }
 
 #' @export
-predictLearner.classif.autoxgboost = function(.learner, .model, .newdata, ...) {
+predictLearner.regr.autoxgboost = function(.learner, .model, .newdata, ...) {
 
   if (inherits(.model, "MBOResult"))
     stop("build.final.model needs to be 'model.only' or 'both'")
@@ -44,7 +44,6 @@ predictLearner.classif.autoxgboost = function(.learner, .model, .newdata, ...) {
     model = .model$learner.model
 
   learner = model$learner
-  learner = setPredictType(learner, .learner$predict.type)
 
   predictLearner(learner, model, .newdata, ...)
 

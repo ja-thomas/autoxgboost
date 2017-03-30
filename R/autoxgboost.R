@@ -31,10 +31,17 @@
 #' @param early.stopping.fraction [\code{numeric(1)}]\cr
 #'   What fraction of the data should be used for early stopping (i.e. as a validation set).
 #'   Default is \code{4/5}.
+#' @param design.size [\code{integer(1)}]\cr
+#'   Size of the initial design. Default is \code{15L}.
+#' @param initial.subsample.range [\code{numeric(2)}]\cr
+#'   From what range should the subsampling parameter in the initial design be sampled?
+#'   It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
+#'   Default is \code{c(0.5, 0.55)}.
 #' @return Special: See \code{build.final.model}
 #' @export
 autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6,
-  early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = "model.only") {
+  early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = "model.only",
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55)) {
 
   tt = getTaskType(task)
   td = getTaskDesc(task)
@@ -50,7 +57,7 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
       max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
 
   } else if (tt == "regr") {
-
+    predict.type = NULL
     objective = "reg:linear"
     eval_metric = "rmse"
 
@@ -80,8 +87,8 @@ autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrou
     }, par.set = par.set, noisy = TRUE, has.simple.signature = FALSE, minimize = measure$minimize)
 
 
-  des = generateDesign(n = 15, par.set)
-  des$subsample = runif(15, 0.5, 0.55)
+  des = generateDesign(n = design.size, par.set)
+  des$subsample = runif(design.size, initial.subsample.range[1], initial.subsample.range[2])
 
   optim.result = mbo(fun = opt, control = control, design = des)
 
