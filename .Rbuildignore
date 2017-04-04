@@ -1,0 +1,15 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+todo-files
+.gitignore
+.travis.yml
+README.md
+README.Rmd
+man-roxygen
+meta
+^_pkgdown\.yml$
+^docs$
+^.+_cache$
+^.+_files$
+^vignettes/.+\.html$
+xgboost.model
