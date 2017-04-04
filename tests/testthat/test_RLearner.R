@@ -3,9 +3,25 @@ context("RLearner autoxgboost")
 test_that("classif.autoxgboost works", {
   ctrl = makeMBOControl()
   ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  lrn = makeLearner("classif.autoxgboost", control = ctrl)
+
+  #response + binary classif
+  lrn = makeLearner("classif.autoxgboost", control = ctrl, predict.type = "response")
+  res = holdout(lrn, sonar.task)
+  expect_equal(c(70, 5), dim(res$pred$data))
+
+  #response + multiclass classif
   res = holdout(lrn, iris.task)
-  expect_equal(c(50,5), dim(res$pred$data))
+  expect_equal(c(50, 5), dim(res$pred$data))
+
+  #prob + binary
+  lrn = makeLearner("classif.autoxgboost", control = ctrl, predict.type = "prob")
+  res = holdout(lrn, sonar.task)
+  expect_equal(c(70, 7), dim(res$pred$data))
+
+  #prob + multiclass classif
+  res = holdout(lrn, iris.task)
+  expect_equal(c(50, 8), dim(res$pred$data))
+
 })
 
 test_that("regr.autoxgboost works", {
