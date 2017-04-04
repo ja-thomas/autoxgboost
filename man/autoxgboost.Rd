@@ -4,25 +4,24 @@
 \alias{autoxgboost}
 \title{Fit and optimize a xgboost model.}
 \usage{
-autoxgboost(task, measure = NULL, control = autoxgbcontrol,
-  par.set = autoxgbparset, max.nrounds = 10^6,
-  early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
-  build.final.model = "model.only", design.size = 15L,
-  initial.subsample.range = c(0.5, 0.55))
+autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
+  max.nrounds = 10^6, early.stopping.rounds = 10L,
+  early.stopping.fraction = 4/5, build.final.model = "model.only",
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55))
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
 The task.}
 
 \item{measure}{[\code{\link[mlr]{Measure}}]\cr
-Performance measure.}
+Performance measure. If \code{NULL} \code{\link[mlr]{getDefaultMeasure}} is used.}
 
 \item{control}{[\code{\link[mlrMBO]{MBOControl}}]\cr
 Control object for mbo. Specifies runtime behaviour.
 Default is to run for 80 iterations or 1 hour, whatever happens first.}
 
 \item{par.set}{[\code{\link[ParamHelpers]{ParamSet}}]\cr
-Parameter set.}
+Parameter set. Default is \code{\link{autoxgbparset}}.}
 
 \item{max.nrounds}{[\code{integer(1)}]\cr
 Maximum number of allowed iterations. Default is \code{10^6}.}
@@ -58,7 +57,9 @@ Special: See \code{build.final.model}
 }
 \description{
 An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).
-The bounds of parameter in which the model is optimized, is defined by \code{autoxgbparset}.
+The bounds of the parameter in which the model is optimized, are defined by \code{\link{autoxgbparset}}.
 For the optimization itself bayesian optimization with \pkg{mlrMBO} is used.
+The runtime is defined by \code{autoxgbcontrol}.
+Both the parameter set and the control object can be set by the user.
 }
 
