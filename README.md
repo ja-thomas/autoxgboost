@@ -1,7 +1,19 @@
-# autoxgboost
+# autoxgboost - Automatic tuning and fitting of [xgboost](https://github.com/dmlc/xgboost).
 
-Automatic tuning and fitting of [xgboost](https://github.com/dmlc/xgboost) with [mlr](https://github.com/mlr-org/mlr) and [mlrMBO](https://github.com/mlr-org/mlrMBO).
+[![Build Status](https://travis-ci.org//ja-thomas/autoxgboost.svg?branch=master)](https://travis-ci.org//ja-thomas/autoxgboost)
+[![CRAN Status Badge](http://www.r-pkg.org/badges/version/autoxgboost)](https://CRAN.R-project.org/package=autoxgboost)
+[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/autoxgboost)](https://cran.rstudio.com/web/packages/autoxgboost/index.html)
 
-**Work in progress**! This is a very early version, so a lot can (and will) change in the future.
 
-Currently only binary classification is supported, but that will change soon.
+* Install the development version
+
+    ```splus
+    devtools::install_github("ja-thomas/autoxgboost")
+    ```
+
+# General overview
+
+autoxgboost aims to find a optimal [xgboost](https://github.com/dmlc/xgboost) model automatically using the machine learning framework [mlr](https://github.com/mlr-org/mlr)
+and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrMBO).
+
+**Work in progress**! This is a very early version, so a lot can change in the future.
