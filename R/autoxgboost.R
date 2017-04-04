@@ -23,7 +23,7 @@
 #' @param build.final.model [\code{character(1)}]\cr
 #'   Should the best found model be fitted on the complete dataset?
 #'   Options are:
-#'   \descibe{
+#'   \describe{
 #'     \item{"model.only"}{A fitted xgboost model based on the best found configuration is returned.}
 #'     \item{"optim.result.only"}{The optimization result is returned.}
 #'     \item{"both"}{Both, model and optimization result are returned as a list.}
@@ -43,6 +43,12 @@
 autoxgboost = function(task, measure = NULL, control = autoxgbcontrol, par.set = autoxgbparset, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = "model.only",
   design.size = 15L, initial.subsample.range = c(0.5, 0.55)) {
+
+  assetIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
+  assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
+  assertSubset(build.final.model, c("both", "model.only", "optim.result.only"))
+  assetIntegerish(design.size, lower = 1)
+  assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2)
 
   tt = getTaskType(task)
   td = getTaskDesc(task)

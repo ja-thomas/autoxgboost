@@ -13,5 +13,6 @@ Depends:
     mlrMBO (>= 1.0.0),
     xgboost (>= 0.6.4)
 Suggests:
-    testthat
+    testthat,
+    checkmate (>= 1.8.2)
 RoxygenNote: 5.0.1

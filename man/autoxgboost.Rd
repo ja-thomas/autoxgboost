@@ -4,10 +4,11 @@
 \alias{autoxgboost}
 \title{Fit and optimize a xgboost model.}
 \usage{
-autoxgboost(task, measure = NULL, control, par.set = autoxgbparset,
-  max.nrounds = 10^6, early.stopping.rounds = 10L,
-  early.stopping.fraction = 4/5, build.final.model = "model.only",
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55))
+autoxgboost(task, measure = NULL, control = autoxgbcontrol,
+  par.set = autoxgbparset, max.nrounds = 10^6,
+  early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
+  build.final.model = "model.only", design.size = 15L,
+  initial.subsample.range = c(0.5, 0.55))
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -17,7 +18,8 @@ The task.}
 Performance measure.}
 
 \item{control}{[\code{\link[mlrMBO]{MBOControl}}]\cr
-Control object for mbo.}
+Control object for mbo. Specifies runtime behaviour.
+Default is to run for 80 iterations or 1 hour, whatever happens first.}
 
 \item{par.set}{[\code{\link[ParamHelpers]{ParamSet}}]\cr
 Parameter set.}
@@ -36,7 +38,7 @@ Default is \code{4/5}.}
 \item{build.final.model}{[\code{character(1)}]\cr
 Should the best found model be fitted on the complete dataset?
 Options are:
-\descibe{
+\describe{
   \item{"model.only"}{A fitted xgboost model based on the best found configuration is returned.}
   \item{"optim.result.only"}{The optimization result is returned.}
   \item{"both"}{Both, model and optimization result are returned as a list.}

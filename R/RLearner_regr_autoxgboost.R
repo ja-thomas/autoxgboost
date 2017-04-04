@@ -25,7 +25,7 @@ makeRLearner.regr.autoxgboost = function() {
 trainLearner.regr.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
   measure = mse, control, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = "model.only", design.size = 15L,
-  initial.subsample.range = c(0.5, 0.55)) {
+  initial.subsample.range = c(0.5, 0.55), ...) {
 
   .task = subsetTask(.task, .subset)
   autoxgboost(.task, measure, control, par.set, max.nrounds, early.stopping.rounds, early.stopping.fraction, build.final.model, design.size, initial.subsample.range)
