@@ -1,0 +1,16 @@
+language: r
+sudo : false
+cache: packages
+
+
+r:
+  - release
+
+r_packages:
+  - mlr
+  - ParamHelpers
+  - smoof
+  - mlrMBO
+  - xgboost
+
+warnings_are_errors: true
