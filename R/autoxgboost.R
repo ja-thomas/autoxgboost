@@ -11,7 +11,8 @@
 #' @param measure [\code{\link[mlr]{Measure}}]\cr
 #'   Performance measure.
 #' @param control [\code{\link[mlrMBO]{MBOControl}}]\cr
-#'   Control object for mbo.
+#'   Control object for mbo. Specifies runtime behaviour.
+#'   Default is to run for 80 iterations or 1 hour, whatever happens first.
 #' @param par.set [\code{\link[ParamHelpers]{ParamSet}}]\cr
 #'   Parameter set.
 #' @param max.nrounds [\code{integer(1)}]\cr
@@ -39,7 +40,7 @@
 #'   Default is \code{c(0.5, 0.55)}.
 #' @return Special: See \code{build.final.model}
 #' @export
-autoxgboost = function(task, measure = NULL, control, par.set = autoxgbparset, max.nrounds = 10^6,
+autoxgboost = function(task, measure = NULL, control = autoxgbcontrol, par.set = autoxgbparset, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = "model.only",
   design.size = 15L, initial.subsample.range = c(0.5, 0.55)) {
 
