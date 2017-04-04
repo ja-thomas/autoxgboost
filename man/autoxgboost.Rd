@@ -4,9 +4,10 @@
 \alias{autoxgboost}
 \title{Fit and optimize a xgboost model.}
 \usage{
-autoxgboost(task, measure, control, par.set = autoxgbparset,
+autoxgboost(task, measure = NULL, control, par.set = autoxgbparset,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
-  early.stopping.fraction = 4/5, build.final.model = "model.only")
+  early.stopping.fraction = 4/5, build.final.model = "model.only",
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55))
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -41,6 +42,14 @@ Options are:
   \item{"both"}{Both, model and optimization result are returned as a list.}
 }
 Default is \code{"model.only"}.}
+
+\item{design.size}{[\code{integer(1)}]\cr
+Size of the initial design. Default is \code{15L}.}
+
+\item{initial.subsample.range}{[\code{numeric(2)}]\cr
+From what range should the subsampling parameter in the initial design be sampled?
+It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
+Default is \code{c(0.5, 0.55)}.}
 }
 \value{
 Special: See \code{build.final.model}

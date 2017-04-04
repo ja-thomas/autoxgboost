@@ -39,12 +39,15 @@
 #'   Default is \code{c(0.5, 0.55)}.
 #' @return Special: See \code{build.final.model}
 #' @export
-autoxgboost = function(task, measure, control, par.set = autoxgbparset, max.nrounds = 10^6,
+autoxgboost = function(task, measure = NULL, control, par.set = autoxgbparset, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = "model.only",
   design.size = 15L, initial.subsample.range = c(0.5, 0.55)) {
 
   tt = getTaskType(task)
   td = getTaskDesc(task)
+
+  if (is.null(measure))
+    measure = getDefaultMeasure(task)
 
   if (tt == "classif") {
 
