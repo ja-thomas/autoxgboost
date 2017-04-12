@@ -6,7 +6,7 @@
 \usage{
 autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
-  early.stopping.fraction = 4/5, build.final.model = "model.only",
+  early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, initial.subsample.range = c(0.5, 0.55))
 }
 \arguments{
@@ -34,22 +34,17 @@ Default is 10.}
 What fraction of the data should be used for early stopping (i.e. as a validation set).
 Default is \code{4/5}.}
 
-\item{build.final.model}{[\code{character(1)}]\cr
+\item{build.final.model}{[\code{logical(1)}]\cr
 Should the best found model be fitted on the complete dataset?
-Options are:
-\describe{
-  \item{"model.only"}{A fitted xgboost model based on the best found configuration is returned.}
-  \item{"optim.result.only"}{The optimization result is returned.}
-  \item{"both"}{Both, model and optimization result are returned as a list.}
-}
-Default is \code{"model.only"}.}
+Default is \code{FALSE}.}
 
 \item{design.size}{[\code{integer(1)}]\cr
 Size of the initial design. Default is \code{15L}.}
 
-\item{initial.subsample.range}{[\code{numeric(2)}]\cr
+\item{initial.subsample.range}{[\code{numeric(2)} | \code{NULL}]\cr
 From what range should the subsampling parameter in the initial design be sampled?
 It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
+If \code{NULL} the full range defined in \code{par.set} is used.
 Default is \code{c(0.5, 0.55)}.}
 }
 \value{

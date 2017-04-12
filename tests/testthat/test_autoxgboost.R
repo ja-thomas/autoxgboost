@@ -5,7 +5,13 @@ test_that("autoxgboost works on different tasks",  {
   checkAutoxgboost = function(task, ...) {
   ctrl = makeMBOControl()
   ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  r = autoxgboost(task, control = ctrl, build.final.model = "both", ...)
+  r = autoxgboost(task, control = ctrl, ...)
+
+  expect_class(r, "AutxgbResult")
+  expect_class(r$final.learner, "RLearner")
+  expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
+  expect_null(r$final.model)
+
 
   extras = names(r$optim.result$opt.path$env$extra[[11]])
   expect_subset("nrounds", extras) # check that nrounds is in extras
@@ -27,22 +33,7 @@ test_that("autoxgboost works on different tasks",  {
   for (f in fractions) {
     for (e in earlystop) {
         for (t in tasks)
-         checkAutoxgboost(task = t, early.stopping.fraction = f, early.stopping.rounds = e)
+         checkAutoxgboost(task = t, early.stopping.fraction = f, early.stopping.rounds = e, build.final.model = FALSE)
     }
   }
-})
-
-test_that("autoxgboost output objects are ok", {
-
-  ctrl = makeMBOControl()
-  ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  r = autoxgboost(iris.task, control = ctrl, build.final.model = "both")
-
-  expect_class(r, "list")
-  expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
-  expect_class(r$model, "WrappedModel")
-
-  expect_class(autoxgboost(iris.task, control = ctrl, build.final.model = "optim.result.only"), c("MBOSingleObjResult", "MBOResult"))
-  expect_class(autoxgboost(iris.task, control = ctrl, build.final.model = "model.only"), "WrappedModel")
-
 })

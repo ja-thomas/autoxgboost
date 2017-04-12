@@ -4,9 +4,9 @@ makeRLearner.classif.autoxgboost = function() {
     cl = "classif.autoxgboost",
     package = "autoxgboost",
     par.set = makeParamSet(
-      makeUntypedLearnerParam(id = "measure", default = mmce),
-      makeUntypedLearnerParam(id = "control", default = autoxgbcontrol),
-      makeUntypedLearnerParam(id = "par.set", default = autoxgbparset),
+      makeUntypedLearnerParam(id = "measure", default = NULL),
+      makeUntypedLearnerParam(id = "control", default = NULL),
+      makeUntypedLearnerParam(id = "par.set", default = NULL),
       makeIntegerLearnerParam(id = "max.nrounds", lower = 1L, default = 10L^6),
       makeIntegerLearnerParam(id = "early.stopping.rounds", lower = 1, default = 10L),
       makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5),
