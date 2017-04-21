@@ -12,5 +12,6 @@ r_packages:
   - smoof
   - mlrMBO
   - xgboost
+  - DiceKriging
 
 warnings_are_errors: true
