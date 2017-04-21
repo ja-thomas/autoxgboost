@@ -54,7 +54,7 @@ Special: See \code{build.final.model}
 An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).
 The bounds of the parameter in which the model is optimized, are defined by \code{\link{autoxgbparset}}.
 For the optimization itself bayesian optimization with \pkg{mlrMBO} is used.
-The runtime is defined by \code{autoxgbcontrol}.
+Without any specification of the control object, the optimizer runs for for 80 iterations or 1 hour, whatever happens first.
 Both the parameter set and the control object can be set by the user.
 }
 

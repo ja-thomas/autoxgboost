@@ -4,7 +4,7 @@
 #' An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).
 #' The bounds of the parameter in which the model is optimized, are defined by \code{\link{autoxgbparset}}.
 #' For the optimization itself bayesian optimization with \pkg{mlrMBO} is used.
-#' The runtime is defined by \code{autoxgbcontrol}.
+#' Without any specification of the control object, the optimizer runs for for 80 iterations or 1 hour, whatever happens first.
 #' Both the parameter set and the control object can be set by the user.
 #'
 #'
@@ -50,7 +50,11 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
 
   measure = coalesce(measure, getDefaultMeasure(task))
-  control = coalesce(control, autoxgboost::autoxgbcontrol)
+  if (is.null(control)) {
+    control = makeMBOControl()
+    control = setMBOControlTermination(control, iters = 80L, time.budget = 3600L)
+  }
+
   par.set = coalesce(par.set, autoxgboost::autoxgbparset)
 
   tt = getTaskType(task)
@@ -112,9 +116,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     NULL
   }
 
-  makeS3Object("AutoxgbResult",
+  makeS3Obj("AutoxgbResult",
     optim.result = optim.result,
     final.learner = lrn,
-    final.model = NULL)
+    final.model = mod)
 
 }

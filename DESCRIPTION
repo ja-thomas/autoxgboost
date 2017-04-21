@@ -12,7 +12,9 @@ Depends:
     smoof (>= 1.4),
     mlrMBO (>= 1.0.0),
     xgboost (>= 0.6.4)
-Suggests:
-    testthat,
+Imports:
+    BBmisc (>= 1.11),
     checkmate (>= 1.8.2)
+Suggests:
+    testthat
 RoxygenNote: 5.0.1

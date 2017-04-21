@@ -2,16 +2,19 @@ context("autoxgboost")
 
 test_that("autoxgboost works on different tasks",  {
 
-  checkAutoxgboost = function(task, ...) {
+  checkAutoxgboost = function(task, build.final.model, ...) {
   ctrl = makeMBOControl()
   ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  r = autoxgboost(task, control = ctrl, ...)
+  r = autoxgboost(task, control = ctrl, build.final.model = build.final.model, ...)
 
-  expect_class(r, "AutxgbResult")
+  expect_class(r, "AutoxgbResult")
   expect_class(r$final.learner, "RLearner")
   expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
-  expect_null(r$final.model)
-
+  if (build.final.model) {
+    expect_class(r$final.model, "WrappedModel")
+  } else {
+    expect_null(r$final.model)
+  }
 
   extras = names(r$optim.result$opt.path$env$extra[[11]])
   expect_subset("nrounds", extras) # check that nrounds is in extras
@@ -23,17 +26,15 @@ test_that("autoxgboost works on different tasks",  {
     sonar.task, #binary classification
     iris.task, #multiclass classification
     subsetTask(bh.task, subset = 1:50, features = c(1:3, 5:12)), #regression
-    subsetTask(bh.task, subset = 1:50) # regression with factors
+    subsetTask(bh.task, subset = 1:50) # factor features
   )
 
-  fractions = c(0.2, 0.5, 0.8)
-  earlystop = c(1, 10)
 
-
-  for (f in fractions) {
-    for (e in earlystop) {
-        for (t in tasks)
-         checkAutoxgboost(task = t, early.stopping.fraction = f, early.stopping.rounds = e, build.final.model = FALSE)
+  for(bfm in c(TRUE, FALSE)) {
+      for (t in tasks) {
+        checkAutoxgboost(task = t, build.final.model = bfm) #check default
+        checkAutoxgboost(task = t, early.stopping.fraction = 0.2, early.stopping.rounds = 1, build.final.model = bfm)
     }
   }
+
 })
