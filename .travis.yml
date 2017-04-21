@@ -13,5 +13,6 @@ r_packages:
   - xgboost
   - DiceKriging
   - parallelMap
+  - rgenoud
 
 warnings_are_errors: true
