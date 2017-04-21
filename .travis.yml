@@ -14,5 +14,6 @@ r_packages:
   - DiceKriging
   - parallelMap
   - rgenoud
+  - shiny
 
 warnings_are_errors: true
