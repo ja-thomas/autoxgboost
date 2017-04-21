@@ -48,7 +48,7 @@ If \code{NULL} the full range defined in \code{par.set} is used.
 Default is \code{c(0.5, 0.55)}.}
 }
 \value{
-Special: See \code{build.final.model}
+\code{\link{AutoxgbResult}}
 }
 \description{
 An xgboost model is optimized based on a measure (see [\code{\link[mlr]{Measure}}]).

@@ -35,7 +35,7 @@
 #'   It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
 #'   If \code{NULL} the full range defined in \code{par.set} is used.
 #'   Default is \code{c(0.5, 0.55)}.
-#' @return Special: See \code{build.final.model}
+#' @return \code{\link{AutoxgbResult}}
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
@@ -119,6 +119,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   makeS3Obj("AutoxgbResult",
     optim.result = optim.result,
     final.learner = lrn,
-    final.model = mod)
+    final.model = mod,
+    measure = measure)
 
 }
