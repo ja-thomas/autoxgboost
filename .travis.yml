@@ -1,6 +1,5 @@
 language: r
 sudo : false
-cache: packages
 
 
 r:
@@ -14,5 +13,7 @@ r_packages:
   - xgboost
   - DiceKriging
   - parallelMap
+  - rgenoud
+  - shiny
 
 warnings_are_errors: true
