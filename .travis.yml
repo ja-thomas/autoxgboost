@@ -13,5 +13,6 @@ r_packages:
   - mlrMBO
   - xgboost
   - DiceKriging
+  - parallelMap
 
 warnings_are_errors: true
