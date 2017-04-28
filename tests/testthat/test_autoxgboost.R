@@ -5,7 +5,7 @@ test_that("autoxgboost works on different tasks",  {
   checkAutoxgboost = function(task, build.final.model, ...) {
   ctrl = makeMBOControl()
   ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  r = autoxgboost(task, control = ctrl, build.final.model = build.final.model, ...)
+  r = autoxgboost(task, control = ctrl, build.final.model = build.final.model, max.nrounds = 1L, ...)
 
   expect_class(r, "AutoxgbResult")
   expect_class(r$final.learner, "RLearner")
@@ -25,8 +25,7 @@ test_that("autoxgboost works on different tasks",  {
   tasks = list(
     sonar.task, #binary classification
     iris.task, #multiclass classification
-    subsetTask(bh.task, subset = 1:50, features = c(1:3, 5:12)), #regression
-    subsetTask(bh.task, subset = 1:50) # factor features
+    subsetTask(bh.task, subset = 1:50)
   )
 
 
