@@ -39,7 +39,8 @@
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55)) {
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact") {
+
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
@@ -48,6 +49,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
   if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
+  assertChoice(factor.encoder, c("impact", "dummy"))
 
   measure = coalesce(measure, getDefaultMeasure(task))
   if (is.null(control)) {
@@ -68,7 +70,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
-    baseLearner = makeLearner("classif.xgboost.earlystop", predict.type = predict.type,
+    base.learner = makeLearner("classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
       max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
 
@@ -77,7 +79,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     objective = "reg:linear"
     eval_metric = "rmse"
 
-    baseLearner = makeLearner("regr.xgboost.earlystop",
+    base.learner = makeLearner("regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
       max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
 
@@ -85,19 +87,30 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     stop("Task must be regression or classification")
   }
 
-  if (sum(td$n.feat[c("factors", "ordered")]) > 0)
-    task = createDummyFeatures(task)
+  if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+    if (factor.encoder == "impact") {
+      base.learner = makeImpactFeaturesWrapper(base.learner, fun = mean)
+    } else {
+      task = createDummyFeatures(task)
+    }
+  }
 
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
 
-      lrn = setHyperPars(baseLearner, par.vals = x)
+      lrn = setHyperPars(base.learner, par.vals = x)
       mod = train(lrn, task)
       test = subsetTask(task, subset = mod$learner.model$test.inds)
       pred = predict(mod, test)
       res = performance(pred, measure)
-      attr(res, "extras") = list(nrounds = mod$learner.model$best_iteration)
+
+      if (!is.null(mod$learner.model$next.model)) {
+        nrounds = mod$learner.model$next.model$learner.model$best_iteration
+      } else {
+        nrounds = mod$learner.model$best_iteration
+      }
+      attr(res, "extras") = list(nrounds = nrounds)
       res
 
     }, par.set = par.set, noisy = TRUE, has.simple.signature = FALSE, minimize = measure$minimize)
@@ -108,7 +121,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   optim.result = mbo(fun = opt, control = control, design = des)
 
-  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
+  lrn = buildFinalLearner(base.learner, optim.result, objective, predict.type, par.set = par.set)
 
   mod = if(build.final.model) {
     train(lrn, task)

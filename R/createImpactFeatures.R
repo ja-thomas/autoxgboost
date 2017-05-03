@@ -20,6 +20,7 @@
 #' @family eda_and_preprocess
 createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL) {
   mlr:::checkTargetPreproc(obj, target, cols)
+  assertFunction(fun)
   UseMethod("createImpactFeatures")
 }
 
@@ -35,7 +36,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
   }
 
   value.table = lapply(work.cols, function(col) {
-    res = aggregate(target.vec, by = list(obj[, col]), fun)
+    res = aggregate(obj[, target], by = list(obj[, col]), fun)
     r = res[,2]
     names(r) = res[,1]
     r
@@ -54,7 +55,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
 
 createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL) {
   target = getTaskTargetNames(obj)
-  d = createImpactFeatures.data.frame(obj = getTaskData(obj), target = target, cols = cols)
+  d = createImpactFeatures.data.frame(obj = getTaskData(obj), target = target, cols = cols, fun = fun)
   return(list(
     data = mlr:::changeData(obj, d$data),
     value.table = d$value.table))

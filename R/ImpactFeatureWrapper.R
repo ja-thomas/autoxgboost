@@ -10,14 +10,15 @@
 #' @family wrapper
 #' @export
 makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
-  learner = checkLearner(learner)
+  learner = mlr:::checkLearner(learner)
   args = list(cols = cols, fun = fun)
   rm(list = names(args))
 
-  trainfun = function(data, target, args = args) {
+  trainfun = function(data, target, args) {
     data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun)
     return(list(data = data$data, control = list(value.table = data$value.table)))
   }
+
   predictfun = function(data, target, args, control) {
 
     value.table = control$value.table
@@ -31,8 +32,8 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
     return(data)
   }
 
-  lrn = makePreprocWrapper(learner, trainfun, predictfun)
-  lrn$id = stri_replace(lrn$id, replacement = ".impact", regex = "\\.preproc$")
+  lrn = makePreprocWrapper(learner, trainfun, predictfun, par.vals = args)
+  lrn$id = stringi::stri_replace(lrn$id, replacement = ".impact", regex = "\\.preproc$")
   addClasses(lrn, "ImpactFeatureWrapper")
 
 }
