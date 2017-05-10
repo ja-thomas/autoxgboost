@@ -4,9 +4,11 @@
 #' Fuses a base learner with the impact feature creator (see \code{\link{createImpactFeatures}}).
 #' Returns a learner which can be used like any other learner.
 #'
-#' @template arg_learner
+#' @param learner [\code{\link{Learner}} | \code{character(1)}]\cr
+#'   The learner.
+#'   If you pass a string the learner will be created via \code{\link{makeLearner}}.
 #' @inheritParams createImpactFeatures
-#' @template ret_learner
+#' @return [\code{\link{Learner}}].
 #' @family wrapper
 #' @export
 makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {

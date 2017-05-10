@@ -6,9 +6,14 @@ test_that("autoxgboost works on different tasks",  {
   ctrl = makeMBOControl()
   ctrl = setMBOControlTermination(ctrl, iters = 1L)
   r = autoxgboost(task, control = ctrl, build.final.model = build.final.model, max.nrounds = 1L, ...)
+  td = getTaskDesc(task)
 
   expect_class(r, "AutoxgbResult")
-  expect_class(r$final.learner, "RLearner")
+  if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+    expect_class(r$final.learner, "ImpactFeatureWrapper")
+  } else {
+    expect_class(r$final.learner, "RLearner")
+  }
   expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
   if (build.final.model) {
     expect_class(r$final.model, "WrappedModel")

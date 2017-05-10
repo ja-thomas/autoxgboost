@@ -104,12 +104,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
       test = subsetTask(task, subset = mod$learner.model$test.inds)
       pred = predict(mod, test)
       res = performance(pred, measure)
+      nrounds = getBestIteration(mod)
 
-      if (!is.null(mod$learner.model$next.model)) {
-        nrounds = mod$learner.model$next.model$learner.model$best_iteration
-      } else {
-        nrounds = mod$learner.model$best_iteration
-      }
       attr(res, "extras") = list(nrounds = nrounds)
       res
 
@@ -121,7 +117,10 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   optim.result = mbo(fun = opt, control = control, design = des)
 
-  lrn = buildFinalLearner(base.learner, optim.result, objective, predict.type, par.set = par.set)
+  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
+
+  if (sum(td$n.feat[c("factors", "ordered")]) > 0 & factor.encoder == "impact")
+      lrn = makeImpactFeaturesWrapper(lrn, fun = mean)
 
   mod = if(build.final.model) {
     train(lrn, task)

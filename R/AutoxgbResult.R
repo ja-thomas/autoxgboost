@@ -23,9 +23,9 @@ print.AutoxgbResult = function(x, ...) {
   catf("Recommended parameters:")
   for (p in names(pars)) {
     if (p != "nrounds" && isNumeric(op$par.set$pars[[p]], include.int = FALSE)) {
-      catf("%s: %.3f", stri_pad_left(p, width = 17), pars[p])
+      catf("%s: %.3f", stringi::stri_pad_left(p, width = 17), pars[p])
     } else {
-      catf("%s: %i", stri_pad_left(p, width = 17), as.integer(pars[p]))
+      catf("%s: %i", stringi::stri_pad_left(p, width = 17), as.integer(pars[p]))
     }
   }
   catf("With tuning result: %s = %.3f\n", op$y.names[1], x$y)
