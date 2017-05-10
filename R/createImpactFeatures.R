@@ -1,31 +1,26 @@
 #' @title Generate impact encoded numeric variables for factor features.
 #'
 #' @description
-#' Replace all factor features with impact encoded versions. The encoding is defined by fun.
+#' Replace all factor features with impact encoded versions. The encoding is defined by \code{fun}.
 #' \code{fun} is called for each level in a factor and operates on the target values of these observations.
 #' For regression a common choice is \code{mean()}, i.e., replace each factor level with the average response.
 #' For binary classification the probability for class one might be a good choice.
+#' Missing factor levels are imputed by the mean of over all other replacements.
 #'
 #' @param obj [\code{data.frame} | \code{\link{Task}}]\cr
 #'   Input data.
-#' @param target [\code{character(1)} | \code{character(2)} | \code{character(n.classes)}]\cr
+#' @param target [\code{character(1)}]\cr
 #'   Name(s) of the target variable(s).
 #'   Only used when \code{obj} is a data.frame, otherwise ignored.
-#'   If survival analysis is applicable, these are the names of the survival time and event columns,
-#'   so it has length 2.
-#'   For multilabel classification these are the names of logical columns that indicate whether
-#'   a class label is present and the number of target variables corresponds to the number of
-#'   classes.
 #' @param cols [\code{character}]\cr
 #'   Columns to create impact features for. Default is to use all columns.
 #' @param fun [\code{function}]\cr
 #'   Function to apply on the response for each factor level, should always return one numeric value.
 #' @return [\code{list}]\cr
-#'   A list with two slot \code{data}, containing either a \code{data.frame} or a \code{task},
-#'   depending on the object passed to the function. A list named \code{value.table} containing
+#'   A list with two slots: \code{data}, containing either a \code{data.frame} or a \code{task},
+#'   depending on the passed object. A list named \code{value.table} containing
 #'   (named) numeric vectors of the replacement values.
 #' @export
-#' @family eda_and_preprocess
 createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL) {
   mlr:::checkTargetPreproc(obj, target, cols)
   assertFunction(fun)
@@ -46,6 +41,8 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
   value.table = lapply(work.cols, function(col) {
     res = aggregate(obj[, target], by = list(obj[, col]), fun)
     r = res[,2]
+    if (!is.null(dim(r)))
+      r = r[, 1]
     names(r) = res[,1]
     r[levels(obj[,col])[levels(obj[,col]) %nin% names(r) ]] = mean(r)
     r

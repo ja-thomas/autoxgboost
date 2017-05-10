@@ -6,7 +6,8 @@
 \description{
 \itemize{
   \item{optim.result [\code{\link[mlrMBO]{MBOResult}}]}{Optimization result object. See: \code{\link[mlrMBO]{MBOResult}}}
-  \item{optim.result [\code{\link[mlr]{MBOResult}}]}{Optimization result object. See: \code{\link[mlrMBO]{MBOResult}}}
-
+  \item{final.learner [\code{\link[mlr]{Learner}}]}{Xgboost learner with best found hyper paramater configuration.}
+  \item{final.model [\code{\link[mlr]{WrappedModel}} | \code{NULL}]}{If \code{build.final.model=TRUE} in \code{\link{autoxgboost}} a \pkg{mlr} model build by the full dataset and \code{final.learner}.}
+  \item{measure [\code{\link[mlr]{Measure}}]}]{Measure used for optimization.}
 }
 }
