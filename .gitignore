@@ -5,3 +5,4 @@ html
 *.sublime-*
 .Rproj.user
 xgboost.model
+test.R
