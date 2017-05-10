@@ -31,18 +31,6 @@ test_that("autoxgboost works on different tasks",  {
     subsetTask(bh.task, subset = 1:50)
   )
 
-
-
-  ctrl = makeMBOControl()
-  ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  ctrl = setMBOControlInfill(ctrl,
-    crit = makeMBOInfillCritMeanResponse(),
-    opt.focussearch.maxit = 1,
-    opt.focussearch.points = 100,
-    opt.restarts = 1)
-
-  mbo.learner = makeLearner("regr.rpart")
-
   for (t in tasks) {
       checkAutoxgboost(task = t, build.final.model = TRUE, control = ctrl, mbo.learner = mbo.learner) #check default
   }

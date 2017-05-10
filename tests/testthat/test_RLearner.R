@@ -1,11 +1,9 @@
 context("RLearner autoxgboost")
 
 test_that("classif.autoxgboost works", {
-  ctrl = makeMBOControl()
-  ctrl = setMBOControlTermination(ctrl, iters = 1L)
 
   #response + binary classif
-  lrn = makeLearner("classif.autoxgboost", control = ctrl, predict.type = "response")
+  lrn = makeLearner("classif.autoxgboost", control = ctrl, mbo.learner = mbo.learner, predict.type = "response")
   res = holdout(lrn, sonar.task)
   expect_equal(c(70, 5), dim(res$pred$data))
 
@@ -14,7 +12,7 @@ test_that("classif.autoxgboost works", {
   expect_equal(c(50, 5), dim(res$pred$data))
 
   #prob + binary
-  lrn = makeLearner("classif.autoxgboost", control = ctrl, predict.type = "prob")
+  lrn = makeLearner("classif.autoxgboost", control = ctrl, mbo.learner = mbo.learner, predict.type = "prob")
   res = holdout(lrn, sonar.task)
   expect_equal(c(70, 7), dim(res$pred$data))
 
@@ -25,9 +23,7 @@ test_that("classif.autoxgboost works", {
 })
 
 test_that("regr.autoxgboost works", {
-  ctrl = makeMBOControl()
-  ctrl = setMBOControlTermination(ctrl, iters = 1L)
-  lrn = makeLearner("regr.autoxgboost", control = ctrl)
+  lrn = makeLearner("regr.autoxgboost", control = ctrl, mbo.learner = mbo.learner)
   res = holdout(lrn, subsetTask(bh.task, subset = 1:50, features = c(1:3, 5:12)))
   expect_equal(c(17,5), dim(res$pred$data))
 })
