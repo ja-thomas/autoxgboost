@@ -35,11 +35,14 @@
 #'   It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
 #'   If \code{NULL} the full range defined in \code{par.set} is used.
 #'   Default is \code{c(0.5, 0.55)}.
+#' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
+#'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
+#'   If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact") {
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL) {
 
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
@@ -61,7 +64,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   tt = getTaskType(task)
   td = getTaskDesc(task)
-
+  has.cat.feats = sum(td$n.feat[c("factors", "ordered")]) > 0
 
 
   if (tt == "classif") {
@@ -87,9 +90,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     stop("Task must be regression or classification")
   }
 
-  if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+  if (has.cat.feats) {
     if (factor.encoder == "impact") {
-      base.learner = makeImpactFeaturesWrapper(base.learner, fun = mean)
+      base.learner = makeImpactFeaturesWrapper(base.learner, fun = ifelse(tt == "regr", mean, classOneFraction))
     } else {
       task = createDummyFeatures(task)
     }
@@ -115,12 +118,12 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   des = generateDesign(n = design.size, par.set)
   des$subsample = runif(design.size, initial.subsample.range[1], initial.subsample.range[2])
 
-  optim.result = mbo(fun = opt, control = control, design = des)
+  optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
   lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
 
-  if (sum(td$n.feat[c("factors", "ordered")]) > 0 & factor.encoder == "impact")
-      lrn = makeImpactFeaturesWrapper(lrn, fun = mean)
+  if (has.cat.feats > 0 & factor.encoder == "impact")
+      lrn = makeImpactFeaturesWrapper(lrn, fun = ifelse(tt == "regr", mean, classOneFraction))
 
   mod = if(build.final.model) {
     train(lrn, task)

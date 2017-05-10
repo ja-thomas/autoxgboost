@@ -8,7 +8,7 @@ autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, initial.subsample.range = c(0.5, 0.55),
-  factor.encoder = "impact")
+  factor.encoder = "impact", mbo.learner = NULL)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -47,6 +47,10 @@ From what range should the subsampling parameter in the initial design be sample
 It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
 If \code{NULL} the full range defined in \code{par.set} is used.
 Default is \code{c(0.5, 0.55)}.}
+
+\item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
+Regression learner from mlr, which is used as a surrogate to model our fitness function.
+If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.}
 }
 \value{
 \code{\link{AutoxgbResult}}

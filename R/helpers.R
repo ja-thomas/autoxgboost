@@ -15,3 +15,9 @@ getBestIteration.PreprocModel = function(mod) {
 getBestIteration.WrappedModel = function(mod) {
   mod$learner.model$best_iteration
 }
+
+
+#relative frequency of first factor level
+classOneFraction = function(x) {
+  table(x)/length(x)[1]
+}
