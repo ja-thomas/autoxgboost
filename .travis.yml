@@ -12,7 +12,7 @@ r_packages:
   - smoof
   - mlrMBO
   - xgboost
-  - DiceKriging
   - parallelMap
+  - rpart
 
 warnings_are_errors: false
