@@ -20,7 +20,8 @@ makeRLearner.regr.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
-      makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5)
+      makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5),
+      makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
     ),
     properties = c("numerics", "weights", "featimp"),
     name = "eXtreme Gradient Boosting",
@@ -30,7 +31,8 @@ makeRLearner.regr.xgboost.earlystop = function() {
 }
 
 #' @export
-trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL, objective, eval_metric, max.nrounds, early_stopping_rounds, early.stopping.fraction = 4/5, ...) {
+trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL,
+  objective, eval_metric, max.nrounds, early_stopping_rounds, early.stopping.fraction = 4/5, nthread, ...) {
 
   parlist = list(...)
   parlist$eval_metric = eval_metric
@@ -54,7 +56,7 @@ trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weight
     objective = "reg:linear"
 
   mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
-    objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
+    objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L, nthread = nthread)
 
   mod$test.inds = test.inds
 

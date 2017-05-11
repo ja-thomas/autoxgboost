@@ -38,11 +38,13 @@
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
 #'   If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.
+#' @param ... [any]\cr
+#'   Further parameters passed down to \code{makeLearner}, i.e., further parameters of \code{xgboost.earlytop}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL) {
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL, ...) {
 
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
@@ -75,7 +77,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
     base.learner = makeLearner("classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
+      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, ...)
 
   } else if (tt == "regr") {
     predict.type = NULL
@@ -84,7 +86,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
     base.learner = makeLearner("regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction)
+      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, ...)
 
   } else {
     stop("Task must be regression or classification")

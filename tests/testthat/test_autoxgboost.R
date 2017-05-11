@@ -3,7 +3,7 @@ context("autoxgboost")
 test_that("autoxgboost works on different tasks",  {
 
   checkAutoxgboost = function(task, build.final.model, control, mbo.learner) {
-  r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L, control = control, mbo.learner = mbo.learner)
+  r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L, control = control, mbo.learner = mbo.learner, nthread = 1)
   td = getTaskDesc(task)
 
   expect_class(r, "AutoxgbResult")
