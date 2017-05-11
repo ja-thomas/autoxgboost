@@ -5,7 +5,7 @@
 #'   \item{optim.result [\code{\link[mlrMBO]{MBOSingleObjResult}}]}{Optimization result object. See: \code{\link[mlrMBO]{MBOSingleObjResult}}}
 #'   \item{final.learner [\code{\link[mlr]{Learner}}]}{Xgboost learner with best found hyper paramater configuration.}
 #'   \item{final.model [\code{\link[mlr]{WrappedModel}} | \code{NULL}]}{If \code{build.final.model=TRUE} in \code{\link{autoxgboost}} a \pkg{mlr} model build by the full dataset and \code{final.learner}.}
-#'   \item{measure [\code{\link[mlr]{Measure}}]}]{Measure used for optimization.}
+#'   \item{measure [\code{\link[mlr]{Measure}}]}{Measure used for optimization.}
 #' }
 #'
 #' @name AutoxgbResult
@@ -34,8 +34,8 @@ print.AutoxgbResult = function(x, ...) {
 
 
 #' @export
-predict.AutoxgbResult = function(x, newdata, ...) {
-  if (is.null(x$final.model))
+predict.AutoxgbResult = function(object, newdata, ...) {
+  if (is.null(object$final.model))
     stop("Final model was not build, use best param configs to build the model yourself.")
-  predict(x$final.model, newdata = newdata, ...)
+  predict(object$final.model, newdata = newdata, ...)
 }
