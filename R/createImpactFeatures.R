@@ -27,6 +27,7 @@ createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = 
   UseMethod("createImpactFeatures")
 }
 
+#' @export
 createImpactFeatures.data.frame = function(obj, target = character(0L), cols = NULL, fun = NULL) {
   # get all factor feature names present in data
   work.cols = colnames(obj)[vlapply(obj, is.factor)]
@@ -59,6 +60,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
     value.table = value.table))
 }
 
+#' @export
 createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL) {
   target = getTaskTargetNames(obj)
   d = createImpactFeatures.data.frame(obj = getTaskData(obj), target = target, cols = cols, fun = fun)
