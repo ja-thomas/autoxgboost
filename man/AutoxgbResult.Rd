@@ -4,6 +4,7 @@
 \alias{AutoxgbResult}
 \title{Result of a autoxgboost call.}
 \description{
+Result of a \code{\link{autoxgboost}}. A list containing the following elements:
 \itemize{
   \item{optim.result [\code{\link[mlrMBO]{MBOSingleObjResult}}]}{Optimization result object. See: \code{\link[mlrMBO]{MBOSingleObjResult}}}
   \item{final.learner [\code{\link[mlr]{Learner}}]}{Xgboost learner with best found hyper paramater configuration.}
