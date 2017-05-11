@@ -19,5 +19,5 @@ getBestIteration.WrappedModel = function(mod) {
 
 #relative frequency of first factor level
 classOneFraction = function(x) {
-  table(x)/length(x)[1]
+  (table(x) / length(x))[1]
 }

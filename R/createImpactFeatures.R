@@ -42,8 +42,6 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
   value.table = lapply(work.cols, function(col) {
     res = aggregate(obj[, target], by = list(obj[, col]), fun)
     r = res[,2]
-    if (!is.null(dim(r)))
-      r = r[, 1]
     names(r) = res[,1]
     r[levels(obj[,col])[levels(obj[,col]) %nin% names(r) ]] = mean(r)
     r

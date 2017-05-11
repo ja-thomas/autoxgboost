@@ -9,7 +9,6 @@
 #'   If you pass a string the learner will be created via \code{\link{makeLearner}}.
 #' @inheritParams createImpactFeatures
 #' @return [\code{\link{Learner}}].
-#' @family wrapper
 #' @export
 makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
   learner = mlr:::checkLearner(learner)
