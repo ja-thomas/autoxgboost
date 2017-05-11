@@ -18,5 +18,6 @@ Imports:
     checkmate (>= 1.8.2),
     stringi
 Suggests:
-    testthat
+    testthat,
+    rpart
 RoxygenNote: 6.0.1
