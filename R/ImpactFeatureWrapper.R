@@ -40,6 +40,7 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
 
 }
 
+#' @export
 getLearnerProperties.ImpactFeatureWrapper = function(learner) {
   union(getLearnerProperties(learner$next.learner), c("factors", "ordered"))
 }

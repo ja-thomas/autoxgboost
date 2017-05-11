@@ -7,6 +7,7 @@
 #' @import checkmate
 #' @importFrom stats predict
 #' @importFrom stats runif
+#' @importFrom stats aggregate
 
 
 registerS3method("makeRLearner", "regr.autoxgboost", makeRLearner.regr.autoxgboost)

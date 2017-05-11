@@ -10,13 +10,13 @@ Depends:
     mlr (>= 2.11),
     ParamHelpers (>= 1.10),
     smoof (>= 1.4),
-    mlrMBO (>= 1.0.0),
-    xgboost (>= 0.6.4),
-    DiceKriging (>= 1.5.5)
+    mlrMBO (>= 1.0.0)
 Imports:
     BBmisc (>= 1.11),
     checkmate (>= 1.8.2),
-    stringi
+    stringi,
+    DiceKriging,
+    xgboost (>= 0.6.4)
 Suggests:
     testthat,
     rpart
