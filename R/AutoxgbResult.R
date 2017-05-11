@@ -31,3 +31,11 @@ print.AutoxgbResult = function(x, ...) {
   catf("With tuning result: %s = %.3f\n", op$y.names[1], x$y)
 
 }
+
+
+#' @export
+predict.AutoxgbResult = function(x, newdata, ...) {
+  if (is.null(x$final.model))
+    stop("Final model was not build, use best param configs to build the model yourself.")
+  predict(x$final.model, newdata = newdata, ...)
+}
