@@ -14,8 +14,6 @@
 #'    \item{alpha}{L1 Regularization: Between \code{2^-10 = 0.00097...} and \code{2^10 = 1024}.}
 #'    \item{subsample}{Subsample fraction: Between \code{0.5} and \code{1}.}
 #' }
-#'
-#'
 #' @name autoxgbparset
 #' @rdname autoxgbparset
 #' @export

@@ -4,8 +4,8 @@
 \alias{AutoxgbResult}
 \title{Result of a autoxgboost call.}
 \description{
-Result of a \code{\link{autoxgboost}}. A list containing the following elements:
-\itemize{
+Result of \code{\link{autoxgboost}}. A list containing the following elements:
+\describe{
   \item{optim.result [\code{\link[mlrMBO]{MBOSingleObjResult}}]}{Optimization result object. See: \code{\link[mlrMBO]{MBOSingleObjResult}}}
   \item{final.learner [\code{\link[mlr]{Learner}}]}{Xgboost learner with best found hyper paramater configuration.}
   \item{final.model [\code{\link[mlr]{WrappedModel}} | \code{NULL}]}{If \code{build.final.model=TRUE} in \code{\link{autoxgboost}} a \pkg{mlr} model build by the full dataset and \code{final.learner}.}
