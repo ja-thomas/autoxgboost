@@ -48,6 +48,11 @@ It is useful to restrict to fraction to be rather small to speed up the calcuati
 If \code{NULL} the full range defined in \code{par.set} is used.
 Default is \code{c(0.5, 0.55)}.}
 
+\item{factor.encoder}{[\code{numeric(1)}]\cr
+Defines how factor variables are handled. Either \code{"impact"} for impact encoding (see \code{\link{makeImpactFeaturesWrapper}}).
+Or \code{"dummy"} for Dummy encoding (see \code{\link[mlr]{createDummyFeatures}}).
+Default is \code{"impact"}.}
+
 \item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
 Regression learner from mlr, which is used as a surrogate to model our fitness function.
 If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.}
