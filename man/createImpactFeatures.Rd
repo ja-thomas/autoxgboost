@@ -21,10 +21,7 @@ Columns to create impact features for. Default is to use all columns.}
 Function to apply on the response for each factor level, should always return one numeric value.}
 }
 \value{
-[\code{list}]\cr
-  A list with two slots: \code{data}, containing either a \code{data.frame} or a \code{task},
-  depending on the passed object. A list named \code{value.table} containing
-  (named) numeric vectors of the replacement values.
+[\code{list}]: A list with two slots, see description for details.
 }
 \description{
 Replace all factor features with impact encoded versions. The encoding is defined by \code{fun}.
@@ -32,5 +29,8 @@ Replace all factor features with impact encoded versions. The encoding is define
 For regression a common choice is \code{mean()}, i.e., replace each factor level with the average response.
 For binary classification the probability for class one might be a good choice.
 Missing factor levels are imputed by the mean of over all other replacements.
+Returned is a list with two slots: \code{data}, containing either a \code{data.frame}
+or a \code{task}, depending on the passed object. A list named \code{value.table} containing
+(named) numeric vectors of the replacement values.
 }
 

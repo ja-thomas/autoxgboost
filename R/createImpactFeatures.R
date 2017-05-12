@@ -6,6 +6,9 @@
 #' For regression a common choice is \code{mean()}, i.e., replace each factor level with the average response.
 #' For binary classification the probability for class one might be a good choice.
 #' Missing factor levels are imputed by the mean of over all other replacements.
+#' Returned is a list with two slots: \code{data}, containing either a \code{data.frame}
+#' or a \code{task}, depending on the passed object. A list named \code{value.table} containing
+#' (named) numeric vectors of the replacement values.
 #'
 #' @param obj [\code{data.frame} | \code{\link{Task}}]\cr
 #'   Input data.
@@ -16,10 +19,7 @@
 #'   Columns to create impact features for. Default is to use all columns.
 #' @param fun [\code{function}]\cr
 #'   Function to apply on the response for each factor level, should always return one numeric value.
-#' @return [\code{list}]\cr
-#'   A list with two slots: \code{data}, containing either a \code{data.frame} or a \code{task},
-#'   depending on the passed object. A list named \code{value.table} containing
-#'   (named) numeric vectors of the replacement values.
+#' @return [\code{list}]: A list with two slots, see description for details.
 #' @export
 createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL) {
   mlr:::checkTargetPreproc(obj, target, cols)
