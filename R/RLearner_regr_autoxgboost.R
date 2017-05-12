@@ -25,14 +25,14 @@ makeRLearner.regr.autoxgboost = function() {
 
 #' @export
 trainLearner.regr.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
-  measure = mse, control, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
+  measure = mse, control = NULL, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE, design.size = 15L,
   initial.subsample.range = c(0.5, 0.55), factor.encode = "impact", mbo.learner = NULL, nthread, ...) {
 
   .task = subsetTask(.task, .subset)
   autoxgboost(.task, measure, control, par.set, max.nrounds, early.stopping.rounds,
     early.stopping.fraction, build.final.model, design.size, initial.subsample.range,
-    factor.encode, mbo.learner, nthread = nthread)
+    factor.encode, mbo.learner, nthread)
 
 }
 

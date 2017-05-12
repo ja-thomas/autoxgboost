@@ -62,9 +62,13 @@ trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .wei
   if (objective %in% c("multi:softprob", "multi:softmax"))
     parlist$num_class = nc
 
-  mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
-    objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L, nthread = nthread)
-
+  if (!missing(nthread)) {
+    mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
+      objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L, nthread = nthread)
+  } else {
+      mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
+      objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
+  }
   mod$test.inds = test.inds
 
   return(mod)
