@@ -8,7 +8,7 @@ autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, initial.subsample.range = c(0.5, 0.55),
-  factor.encoder = "impact", mbo.learner = NULL, ...)
+  factor.encoder = "impact", mbo.learner = NULL, nthread = NULL)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -57,8 +57,9 @@ Default is \code{"impact"}.}
 Regression learner from mlr, which is used as a surrogate to model our fitness function.
 If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.}
 
-\item{...}{[any]\cr
-Further parameters passed down to \code{makeLearner}, i.e., further parameters of \code{xgboost.earlytop}.}
+\item{nthread}{[integer(1)]\cr
+Number of cores to use.
+If \code{NULL} (default), xgboost will determine internally how many cores to use.}
 }
 \value{
 \code{\link{AutoxgbResult}}

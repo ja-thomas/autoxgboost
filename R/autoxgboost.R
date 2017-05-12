@@ -42,14 +42,14 @@
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
 #'   If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.
-#' @param ... [any]\cr
-#'   Further parameters passed down to \code{makeLearner}, i.e., further parameters of \code{xgboost.earlytop}.
+#' @param nthread [integer(1)]\cr
+#'   Number of cores to use.
+#'   If \code{NULL} (default), xgboost will determine internally how many cores to use.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL, ...) {
-
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL, nthread = NULL) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
@@ -67,11 +67,12 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   }
 
   par.set = coalesce(par.set, autoxgboost::autoxgbparset)
-
   tt = getTaskType(task)
   td = getTaskDesc(task)
   has.cat.feats = sum(td$n.feat[c("factors", "ordered")]) > 0
-
+  pv = list()
+  if (!is.null(nthread))
+    pv$nthread = nthread
 
   if (tt == "classif") {
 
@@ -79,18 +80,18 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
-    base.learner = makeLearner("classif.xgboost.earlystop", predict.type = predict.type,
+    base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, ...)
+      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
 
   } else if (tt == "regr") {
     predict.type = NULL
     objective = "reg:linear"
     eval_metric = "rmse"
 
-    base.learner = makeLearner("regr.xgboost.earlystop",
+    base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, ...)
+      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
 
   } else {
     stop("Task must be regression or classification")
