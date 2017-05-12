@@ -98,7 +98,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   if (has.cat.feats) {
     if (factor.encoder == "impact") {
-      base.learner = makeImpactFeaturesWrapper(base.learner, fun = ifelse(tt == "regr", mean, classOneFraction))
+      encode.fun = if (tt == "regr") mean else classOneFraction
+      base.learner = makeImpactFeaturesWrapper(base.learner, fun = encode.fun)
     } else {
       task = createDummyFeatures(task)
     }
@@ -128,8 +129,10 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
 
-  if (has.cat.feats > 0 & factor.encoder == "impact")
-      lrn = makeImpactFeaturesWrapper(lrn, fun = ifelse(tt == "regr", mean, classOneFraction))
+  if (has.cat.feats > 0 & factor.encoder == "impact") {
+    lrn = makeImpactFeaturesWrapper(lrn, fun = encode.fun)
+  }
+
 
   mod = if(build.final.model) {
     train(lrn, task)

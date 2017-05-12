@@ -3,20 +3,20 @@ context("autoxgboost")
 test_that("autoxgboost works on different tasks",  {
 
   checkAutoxgboost = function(task, build.final.model, control, mbo.learner) {
-  r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L, control = control, mbo.learner = mbo.learner, nthread = 1)
-  td = getTaskDesc(task)
+    r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L, control = control, mbo.learner = mbo.learner, nthread = 1)
+    td = getTaskDesc(task)
 
-  expect_class(r, "AutoxgbResult")
-  if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
-    expect_class(r$final.learner, "ImpactFeatureWrapper")
-  } else {
-    expect_class(r$final.learner, "RLearner")
-  }
-  expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
-  expect_class(r$final.model, "WrappedModel")
+    expect_class(r, "AutoxgbResult")
+    if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+      expect_class(r$final.learner, "ImpactFeatureWrapper")
+    } else {
+      expect_class(r$final.learner, "RLearner")
+    }
+    expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
+    expect_class(r$final.model, "WrappedModel")
 
-  extras = names(r$optim.result$opt.path$env$extra[[11]])
-  expect_subset("nrounds", extras) # check that nrounds is in extras
+    extras = names(r$optim.result$opt.path$env$extra[[11]])
+    expect_subset("nrounds", extras) # check that nrounds is in extras
   expect_equal(16, nrow(as.data.frame(r$optim.result$opt.path))) # check that opt.path has right number of rows
   }
 

@@ -2,7 +2,9 @@ Package: autoxgboost
 Title: Automatic tuning and fitting of xgboost
 Version: 0.0.0.9000
 Authors@R: person("Janek", "Thomas", email = "janek.tho@gmail.com", role = c("aut", "cre"))
-Description: Automatic tuning and fitting of 'xgboost'. Use early stopping to determine the optimal number of iterations and Bayesian optimization (from 'mlrMBO') for all further parameters.
+Description: Automatic tuning and fitting of 'xgboost'. Use early stopping
+    to determine the optimal number of iterations and Bayesian optimization (from
+    'mlrMBO') for all further parameters.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
@@ -20,4 +22,4 @@ Imports:
 Suggests:
     testthat,
     rpart
-RoxygenNote: 6.0.1
+RoxygenNote: 5.0.1

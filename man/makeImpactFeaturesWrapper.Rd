@@ -24,3 +24,4 @@ Function to apply on the response for each factor level, should always return on
 Fuses a base learner with the impact feature creator (see \code{\link{createImpactFeatures}}).
 Returns a learner which can be used like any other learner.
 }
+
