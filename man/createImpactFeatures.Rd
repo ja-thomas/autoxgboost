@@ -33,4 +33,3 @@ Returned is a list with two slots: \code{data}, containing either a \code{data.f
 or a \code{task}, depending on the passed object. A list named \code{value.table} containing
 (named) numeric vectors of the replacement values.
 }
-

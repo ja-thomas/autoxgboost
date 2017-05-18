@@ -29,11 +29,16 @@ test_that("autoxgboost works on different tasks",  {
   iris.fac$bla = as.factor(sample(c("A", "B"), 100, T))
   iris.fac = makeClassifTask(data = iris.fac, target = "Species")
 
+  iris.miss = iris
+  iris.miss[4,3] = NA
+  iris.miss = makeClassifTask(data = iris.miss, target = "Species")
+
   tasks = list(
     sonar.task, #binary classification
     iris.fac, #binary classification with factors
     iris.task, #multiclass classification
-    subsetTask(bh.task, subset = 1:50)
+    subsetTask(bh.task, subset = 1:50),
+    iris.fac
   )
 
   for (im in c("impact", "dummy")) {
