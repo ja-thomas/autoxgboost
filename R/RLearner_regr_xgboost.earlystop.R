@@ -23,7 +23,7 @@ makeRLearner.regr.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
     ),
-    properties = c("numerics", "weights", "featimp"),
+    properties = c("numerics", "weights", "featimp", "missings"),
     name = "eXtreme Gradient Boosting",
     short.name = "xgboost.earlystop",
     note = ""
