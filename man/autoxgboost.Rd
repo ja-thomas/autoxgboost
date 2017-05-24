@@ -63,7 +63,7 @@ Number of cores to use.
 If \code{NULL} (default), xgboost will determine internally how many cores to use.}
 
 \item{tune.threshold}{[logical(1)]\cr
-Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tune.threshold}}.
+Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tuneThreshold}}.
 Default is \code{TRUE}.}
 }
 \value{
