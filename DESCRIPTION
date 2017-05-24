@@ -21,5 +21,6 @@ Imports:
     xgboost (>= 0.6.4)
 Suggests:
     testthat,
-    rpart
+    rpart,
+    cmaes
 RoxygenNote: 6.0.1
