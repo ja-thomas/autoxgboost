@@ -1,10 +1,8 @@
 context("autoxgboost")
 
-test_that("autoxgboost works on different tasks",  {
-
-  checkAutoxgboost = function(task, build.final.model, factor.encoder, control, mbo.learner) {
+checkAutoxgboost = function(task, build.final.model, factor.encoder, control, mbo.learner, tune.threshold) {
     r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L,
-      factor.encoder = factor.encoder, control = control, mbo.learner = mbo.learner, nthread = 1)
+      factor.encoder = factor.encoder, control = control, mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
     td = getTaskDesc(task)
 
     expect_class(r, "AutoxgbResult")
@@ -25,6 +23,8 @@ test_that("autoxgboost works on different tasks",  {
 
   }
 
+test_that("autoxgboost works on different tasks",  {
+
   iris.fac = droplevels(iris[1:100,])
   iris.fac$bla = as.factor(sample(c("A", "B"), 100, T))
   iris.fac = makeClassifTask(data = iris.fac, target = "Species")
@@ -43,8 +43,13 @@ test_that("autoxgboost works on different tasks",  {
 
   for (im in c("impact", "dummy")) {
     for (t in tasks) {
-      checkAutoxgboost(task = t, build.final.model = TRUE, factor.encoder = im, control = ctrl, mbo.learner = mbo.learner) #check default
+      checkAutoxgboost(task = t, build.final.model = TRUE, factor.encoder = im, control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
     }
   }
 
+})
+
+test_that("autoxgboost thresholding works",  {
+  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = iris.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
 })

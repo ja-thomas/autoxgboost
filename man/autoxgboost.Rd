@@ -8,7 +8,8 @@ autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, initial.subsample.range = c(0.5, 0.55),
-  factor.encoder = "impact", mbo.learner = NULL, nthread = NULL)
+  factor.encoder = "impact", mbo.learner = NULL, nthread = NULL,
+  tune.threshold = TRUE)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -19,7 +20,7 @@ Performance measure. If \code{NULL} \code{\link[mlr]{getDefaultMeasure}} is used
 
 \item{control}{[\code{\link[mlrMBO]{MBOControl}}]\cr
 Control object for mbo. Specifies runtime behaviour.
-Default is to run for 80 iterations or 1 hour, whatever happens first.}
+Default is to run for 160 iterations or 1 hour, whatever happens first.}
 
 \item{par.set}{[\code{\link[ParamHelpers]{ParamSet}}]\cr
 Parameter set. Default is \code{\link{autoxgbparset}}.}
@@ -60,6 +61,10 @@ If \code{NULL} (default), the default learner is determined as described here: \
 \item{nthread}{[integer(1)]\cr
 Number of cores to use.
 If \code{NULL} (default), xgboost will determine internally how many cores to use.}
+
+\item{tune.threshold}{[logical(1)]\cr
+Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tune.threshold}}.
+Default is \code{TRUE}.}
 }
 \value{
 \code{\link{AutoxgbResult}}

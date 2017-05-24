@@ -6,7 +6,7 @@ buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.s
 
   lrn = if (!is.null(predict.type)) {
     makeLearner("classif.xgboost", par.vals = pars, nrounds = nrounds,
-      objective = objective, predict.type = predict.type)
+      objective = objective, predict.type = predict.type, predict.threshold = getThreshold(optim.result))
   } else {
     makeLearner("regr.xgboost", par.vals = pars, nrounds = nrounds,
       objective = objective)

@@ -19,6 +19,7 @@ print.AutoxgbResult = function(x, ...) {
   op = x$optim.result$opt.path
   pars = trafoValue(op$par.set, x$optim.result$x)
   pars$nrounds = getBestNrounds(x$optim.result)
+  thr = getThreshold(x$optim.result)
   catf("Autoxgboost tuning result\n")
   catf("Recommended parameters:")
   for (p in names(pars)) {
@@ -28,7 +29,16 @@ print.AutoxgbResult = function(x, ...) {
       catf("%s: %i", stringi::stri_pad_left(p, width = 17), as.integer(pars[p]))
     }
   }
-  catf("With tuning result: %s = %.3f\n", op$y.names[1], x$y)
+
+  catf("\nWith tuning result: %s = %.3f", x$measure$id, x$optim.result$y)
+
+  if (!is.null(thr)) {
+    if (length(thr) == 1) {
+      catf("Classification Threshold: %.3f", thr)
+    } else {
+      catf("Classification Thresholds: %s", paste(names(thr), round(thr, 3), sep = ": ", collapse = "; "))
+    }
+  }
 
 }
 

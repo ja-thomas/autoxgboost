@@ -14,9 +14,10 @@ makeRLearner.classif.autoxgboost = function() {
       makeNumericVectorLearnerParam(id = "initial.subsample.range", len = 2, lower = c(0,0), upper = c(1,1), default = c(0.5, 0.55)),
       makeDiscreteLearnerParam(id  = "factor.encode", values = c("impact", "dummy"), default = "impact"),
       makeUntypedLearnerParam(id = "mbo.learner"),
-      makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
+      makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE),
+      makeLogicalLearnerParam(id = "tune.threshold", default = TRUE)
     ),
-    properties = c("twoclass", "multiclass", "numerics", "prob", "weights", "missings"),
+    properties = c("twoclass", "multiclass", "numerics", "factors", "prob", "weights", "missings"),
     name = "Automatic eXtreme Gradient Boosting",
     short.name = "autoxgboost",
     note = ""
@@ -27,12 +28,12 @@ makeRLearner.classif.autoxgboost = function() {
 trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
   measure = mmce, control = NULL, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE, design.size = 15L,
-  initial.subsample.range = c(0.5, 0.55), factor.encode = "impact", mbo.learner = NULL, nthread = NULL, ...) {
+  initial.subsample.range = c(0.5, 0.55), factor.encode = "impact", mbo.learner = NULL, nthread = NULL, tune.threshold, ...) {
 
   .task = subsetTask(.task, .subset)
   autoxgboost(.task, measure, control, par.set, max.nrounds, early.stopping.rounds,
     early.stopping.fraction, build.final.model, design.size, initial.subsample.range,
-    factor.encode, mbo.learner, nthread)
+    factor.encode, mbo.learner, nthread, tune.threshold)
 
 }
 

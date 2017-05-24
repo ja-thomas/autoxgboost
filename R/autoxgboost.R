@@ -14,7 +14,7 @@
 #'   Performance measure. If \code{NULL} \code{\link[mlr]{getDefaultMeasure}} is used.
 #' @param control [\code{\link[mlrMBO]{MBOControl}}]\cr
 #'   Control object for mbo. Specifies runtime behaviour.
-#'   Default is to run for 80 iterations or 1 hour, whatever happens first.
+#'   Default is to run for 160 iterations or 1 hour, whatever happens first.
 #' @param par.set [\code{\link[ParamHelpers]{ParamSet}}]\cr
 #'   Parameter set. Default is \code{\link{autoxgbparset}}.
 #' @param max.nrounds [\code{integer(1)}]\cr
@@ -45,25 +45,31 @@
 #' @param nthread [integer(1)]\cr
 #'   Number of cores to use.
 #'   If \code{NULL} (default), xgboost will determine internally how many cores to use.
+#' @param tune.threshold [logical(1)]\cr
+#'   Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tune.threshold}}.
+#'   Default is \code{TRUE}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL, nthread = NULL) {
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL,
+  nthread = NULL, tune.threshold = TRUE) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
   assertFlag(build.final.model)
-  assertIntegerish(design.size, lower = 1)
+  assertIntegerish(design.size, lower = 1, null.ok = FALSE)
   assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
   if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
   assertChoice(factor.encoder, c("impact", "dummy"))
+  assertIntegerish(nthread, lower = 1, null.ok = TRUE)
+  assertFlag(tune.threshold)
 
   measure = coalesce(measure, getDefaultMeasure(task))
   if (is.null(control)) {
     control = makeMBOControl()
-    control = setMBOControlTermination(control, iters = 80L, time.budget = 3600L)
+    control = setMBOControlTermination(control, iters = 160L, time.budget = 3600L)
   }
 
   par.set = coalesce(par.set, autoxgboost::autoxgbparset)
@@ -114,10 +120,17 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
       mod = train(lrn, task)
       test = subsetTask(task, subset = mod$learner.model$test.inds)
       pred = predict(mod, test)
-      res = performance(pred, measure)
       nrounds = getBestIteration(mod)
 
-      attr(res, "extras") = list(nrounds = nrounds)
+      if (tune.threshold && tt == "classif") {
+        tune.res = tuneThreshold(pred = pred, measure = measure)
+        res = tune.res$perf
+        attr(res, "extras") = list(nrounds = nrounds, .threshold = tune.res$th)
+      } else {
+        res = performance(pred, measure)
+        attr(res, "extras") = list(nrounds = nrounds)
+      }
+
       res
 
     }, par.set = par.set, noisy = TRUE, has.simple.signature = FALSE, minimize = measure$minimize)
