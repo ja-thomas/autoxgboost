@@ -14,5 +14,6 @@ r_packages:
   - xgboost
   - parallelMap
   - rpart
+  - cmaes
 
 warnings_are_errors: true
