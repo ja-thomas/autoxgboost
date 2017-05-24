@@ -18,7 +18,9 @@ Only used when \code{obj} is a data.frame, otherwise ignored.}
 Columns to create impact features for. Default is to use all columns.}
 
 \item{fun}{[\code{function}]\cr
-Function to apply on the response for each factor level, should always return one numeric value.}
+Function to apply to the response for each factor level, should always return a numeric vector.
+If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
+and \code{table(x) / length(x)} for multiclass classification.}
 }
 \value{
 [\code{list}]: A list with two slots, see description for details.
@@ -31,5 +33,6 @@ For binary classification the probability for class one might be a good choice.
 Missing factor levels are imputed by the mean of over all other replacements.
 Returned is a list with two slots: \code{data}, containing either a \code{data.frame}
 or a \code{task}, depending on the passed object. A list named \code{value.table} containing
-(named) numeric vectors of the replacement values.
+data.frames of the replacement values, where the first column are the feature levels, and all further
+columns the results of \code{fun}.
 }

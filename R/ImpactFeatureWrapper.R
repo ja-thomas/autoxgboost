@@ -26,8 +26,20 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
     work.cols = names(value.table)
 
     for (wc in work.cols) {
-      levels(data[,wc]) = value.table[[wc]]
-      data[,wc] = as.numeric(as.character(data[,wc]))
+      tab = value.table[[wc]]
+      if (ncol(tab) == 2) {
+        levels(data[,wc]) = tab[,2]
+        data[,wc] = as.numeric(as.character(data[,wc]))
+      } else { # for multiclass classif
+        new.cols = paste(wc, colnames(tab)[-1], sep = ".")
+        data[, new.cols] = data[, wc]
+        data[, wc] = NULL
+        for(i in seq_along(new.cols)) {
+          data[, new.cols[i]] = as.factor(data[, new.cols[i]])
+          levels(data[, new.cols[i]]) = tab[, i + 1]
+          data[,new.cols[i]] = as.numeric(as.character(data[, new.cols[i]]))
+        }
+      }
     }
 
     return(data)

@@ -15,7 +15,9 @@ If you pass a string the learner will be created via \code{\link{makeLearner}}.}
 Columns to create impact features for. Default is to use all columns.}
 
 \item{fun}{[\code{function}]\cr
-Function to apply on the response for each factor level, should always return one numeric value.}
+Function to apply to the response for each factor level, should always return a numeric vector.
+If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
+and \code{table(x) / length(x)} for multiclass classification.}
 }
 \value{
 [\code{\link{Learner}}].
