@@ -13,7 +13,7 @@
 
 # General overview
 
-autoxgboost aims to find a optimal [xgboost](https://github.com/dmlc/xgboost) model automatically using the machine learning framework [mlr](https://github.com/mlr-org/mlr)
+autoxgboost aims to find an optimal [xgboost](https://github.com/dmlc/xgboost) model automatically using the machine learning framework [mlr](https://github.com/mlr-org/mlr)
 and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrMBO).
 
 **Work in progress**! This is a very early version, so a lot can change in the future.
