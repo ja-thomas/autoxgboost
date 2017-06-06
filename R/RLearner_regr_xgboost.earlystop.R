@@ -17,6 +17,7 @@ makeRLearner.regr.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "alpha", default = 0, lower = 0),
       makeUntypedLearnerParam(id = "objective", default = "binary:logistic", tunable = FALSE),
       makeUntypedLearnerParam(id = "eval_metric", default = "error", tunable = FALSE),
+      makeUntypedLearnerParam(id = "maximize", default = NULL, tunable = FALSE),
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
@@ -32,7 +33,7 @@ makeRLearner.regr.xgboost.earlystop = function() {
 
 #' @export
 trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL,
-  objective, eval_metric, max.nrounds, early_stopping_rounds, early.stopping.fraction = 4/5, nthread, ...) {
+  objective, eval_metric, maximize, max.nrounds, early_stopping_rounds, early.stopping.fraction = 4/5, nthread, ...) {
 
   parlist = list(...)
   parlist$eval_metric = eval_metric
@@ -57,10 +58,10 @@ trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weight
 
   if (!missing(nthread)) {
     mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
-      objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L, nthread = nthread)
+      objective = objective, maximize = maximize, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L, nthread = nthread)
   } else {
       mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
-      objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
+      objective = objective, maximize = maximize, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
   }
 
   mod$test.inds = test.inds

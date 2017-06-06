@@ -4,5 +4,6 @@ autoxgboost_*.tar.gz
 html
 *.sublime-*
 .Rproj.user
+*.Rproj
 xgboost.model
 test.R

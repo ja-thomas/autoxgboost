@@ -22,5 +22,6 @@ Imports:
 Suggests:
     testthat,
     rpart,
-    cmaes
+    cmaes,
+    rgenoud
 RoxygenNote: 6.0.1

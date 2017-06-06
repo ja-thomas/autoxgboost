@@ -84,19 +84,26 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
     predict.type = ifelse("req.pred" %in% measure$properties, "prob", "response")
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
-    eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
-
+    #eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
+    eval_metric = match.fun(paste0("autoxgb", toupper(measure$id)))
+    maximize = !measure$minimize
+    #if (eval_metric %in% c("error", "merror"))
+    #  maximize = FALSE
+    #else
+    #  maximize = !measure$minimize
+    
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
+      eval_metric = eval_metric, maximize = maximize, objective = objective, early_stopping_rounds = early.stopping.rounds,
       max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
 
   } else if (tt == "regr") {
     predict.type = NULL
     objective = "reg:linear"
-    eval_metric = "rmse"
+    eval_metric = match.fun(paste0("autoxgb", toupper(measure$id)))
+    maximize = !measure$minimize
 
     base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
+      eval_metric = eval_metric, maximize = maximize, objective = objective, early_stopping_rounds = early.stopping.rounds,
       max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
 
   } else {
