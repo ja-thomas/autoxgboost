@@ -237,7 +237,7 @@ autoxgbMULTICLASS.AU1P = function(preds, dtrain) {
   truth = as.factor(getinfo(dtrain, "label"))
   preds = matrix(preds, ncol = nlevels(truth), dimnames = list(NULL , levels(truth)))
   err = measureAU1P(preds, truth)
-  return(list(metric = "multiclass.aunu", value = err))
+  return(list(metric = "multiclass.au1p", value = err))
 }
 
 #' @export autoxgbMULTICLASS.BRIER
@@ -247,57 +247,30 @@ autoxgbMULTICLASS.BRIER = function(preds, dtrain) {
   truth = as.factor(getinfo(dtrain, "label"))
   preds = matrix(preds, ncol = nlevels(truth), dimnames = list(NULL , levels(truth)))
   err = measureMulticlassBrier(preds, truth)
-  return(list(metric = "multiclass.aunu", value = err))
+  return(list(metric = "multiclass.brier", value = err))
 }
 
+#' @export autoxgbLOGLOSS
+#' @rdname autoxgbMeasures
+#' @format none
+autoxgbLOGLOSS = function(preds, dtrain) {
+  truth = as.factor(getinfo(dtrain, "label"))
+  preds = matrix(preds, ncol = nlevels(truth), dimnames = list(NULL , levels(truth)))
+  err = measureLogloss(preds, truth)
+  return(list(metric = "logloss", value = err))
+}
 
-#' #' @export logloss
-#' #' @rdname measures
-#' #' @format none
-#' logloss = makeMeasure(id = "logloss", minimize = TRUE, best = 0, worst = Inf,
-#'   properties = c("classif", "classif.multi", "req.truth", "req.prob"),
-#'   name = "Logarithmic loss",
-#'   note = "Defined as: -mean(log(p_i)), where p_i is the predicted probability of the true class of observation i. Inspired by https://www.kaggle.com/wiki/MultiClassLogLoss.",
-#'   fun = function(task, model, pred, feats, extra.args) {
-#'     measureLogloss(getPredictionProbabilities(pred, cl = pred$task.desc$class.levels), pred$data$truth)
-#'   }
-#' )
-#' 
-#' #' @export measureLogloss
-#' #' @rdname measures
-#' #' @format none
-#' measureLogloss = function(probabilities, truth){
-#'   eps = 1e-15
-#'   #let's confine the predicted probabilities to [eps,1 - eps], so logLoss doesn't reach infinity under any circumstance
-#'   probabilities[probabilities > 1 - eps] = 1 - eps
-#'   probabilities[probabilities < eps] = eps
-#'   truth = match(as.character(truth), colnames(probabilities))
-#'   p = getRowEls(probabilities, truth)
-#'   -1 * mean(log(p))
-#' }
-#' 
-#' #' @export ssr
-#' #' @rdname measures
-#' #' @format none
-#' ssr = makeMeasure(id = "ssr", minimize = FALSE, best = 1, worst = 0,
-#'   properties = c("classif", "classif.multi", "req.truth", "req.prob"),
-#'   name = "Spherical Scoring Rule",
-#'   note = "Defined as: mean(p_i(sum_j(p_ij))), where p_i is the predicted probability of the true class of observation i and p_ij is the predicted probablity of observation i for class j.
-#'   See: Bickel, J. E. (2007). Some comparisons among quadratic, spherical, and logarithmic scoring rules. Decision Analysis, 4(2), 49-65.",
-#'   fun = function(task, model, pred, feats, extra.args) {
-#'     measureSSR(getPredictionProbabilities(pred, cl = pred$task.desc$class.levels), pred$data$truth)
-#'   }
-#' )
-#' 
-#' #' @export measureSSR
-#' #' @rdname measures
-#' #' @format none
-#' measureSSR = function(probabilities, truth){
-#'   truth = match(as.character(truth), colnames(probabilities))
-#'   p = getRowEls(probabilities, truth)
-#'   mean(p / sqrt(rowSums(probabilities^2)))
-#' }
-#' 
+#' @export autoxgbSSR
+#' @rdname autoxgbMeasures
+#' @format none
+autoxgbSSR = function(preds, dtrain) {
+  truth = as.factor(getinfo(dtrain, "label"))
+  preds = matrix(preds, ncol = nlevels(truth), dimnames = list(NULL , levels(truth)))
+  err = measureSSR(preds, truth)
+  return(list(metric = "ssr", value = err))
+}
+
+ 
 #' #' @export qsr
 #' #' @rdname measures
 #' #' @format none
