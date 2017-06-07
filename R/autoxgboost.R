@@ -81,16 +81,22 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     pv$nthread = nthread
 
   if (tt == "classif") {
-
-    predict.type = ifelse("req.prob" %in% measure$properties, "prob", "response")
-    objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
-    #eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
+    if ("req.prob" %in% measure$properties) {
+      predict.type = "prob"
+    } else {
+      predict.type = "response"
+      tune.threshold = FALSE
+    }
+    
+    
+    if ("req.prob" %in% measure$properties)
+      objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
+    else
+      objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softmax")
+    
     eval_metric = match.fun(paste0("autoxgb", toupper(measure$id)))
     maximize = !measure$minimize
-    #if (eval_metric %in% c("error", "merror"))
-    #  maximize = FALSE
-    #else
-    #  maximize = !measure$minimize
+
     
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, maximize = maximize, objective = objective, early_stopping_rounds = early.stopping.rounds,
