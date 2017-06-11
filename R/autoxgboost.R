@@ -82,7 +82,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   if (tt == "classif") {
 
-    predict.type = ifelse("req.prob" %in% measure$properties, "prob", "response")
+    predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold == TRUE, "prob", "response")
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
