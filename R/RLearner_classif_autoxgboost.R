@@ -28,7 +28,7 @@ makeRLearner.classif.autoxgboost = function() {
 trainLearner.classif.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
   measure = mmce, control = NULL, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE, design.size = 15L,
-  initial.subsample.range = c(0.5, 0.55), factor.encode = "impact", mbo.learner = NULL, nthread = NULL, tune.threshold, ...) {
+  initial.subsample.range = c(0.5, 0.55), factor.encode = "impact", mbo.learner = NULL, nthread = NULL, tune.threshold = TRUE, ...) {
 
   .task = subsetTask(.task, .subset)
   autoxgboost(.task, measure, control, par.set, max.nrounds, early.stopping.rounds,
