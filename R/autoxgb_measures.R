@@ -242,6 +242,7 @@ autoxgbBRIER.SCALED = function(preds, dtrain) {
 autoxgbBAC = function(preds, dtrain) {
   truth = as.factor(getinfo(dtrain, "label"))
   lvl = levels(truth)
+  preds = ifelse(preds > 0.5, lvl[1], lvl[2])
   err = measureBAC(truth, response = preds, negative = lvl[2], positive = lvl[1])
   return(list(metric = "bac", value = err))
 } 
