@@ -15,8 +15,8 @@ makeRLearner.regr.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "lambda", default = 0, lower = 0),
       makeNumericLearnerParam(id = "lambda_bias", default = 0, lower = 0),
       makeNumericLearnerParam(id = "alpha", default = 0, lower = 0),
-      makeUntypedLearnerParam(id = "objective", default = "binary:logistic", tunable = FALSE),
-      makeUntypedLearnerParam(id = "eval_metric", default = "error", tunable = FALSE),
+      makeUntypedLearnerParam(id = "objective", default = NULL, tunable = FALSE),
+      makeUntypedLearnerParam(id = "eval_metric", default = NULL, tunable = FALSE),
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
@@ -32,9 +32,11 @@ makeRLearner.regr.xgboost.earlystop = function() {
 
 #' @export
 trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL,
-  objective, eval_metric, max.nrounds, early_stopping_rounds, early.stopping.fraction = 4/5, nthread, ...) {
+  objective = NULL, eval_metric = NULL, early_stopping_rounds = 1, max.nrounds = 10^6, early.stopping.fraction = 4/5, nthread, ...) {
 
   parlist = list(...)
+  if (is.null(eval_metric))
+    eval_metric = "rmse"
   parlist$eval_metric = eval_metric
 
   rdesc = makeResampleDesc("Holdout", split = early.stopping.fraction)
