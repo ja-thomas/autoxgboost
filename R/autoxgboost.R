@@ -94,7 +94,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     else
       objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softmax")
     
-    eval_metric = match.fun(paste0("autoxgb", toupper(measure$id)))
+    eval_metric = generateXgbEvalFun(measure, tt)
     maximize = !measure$minimize
 
     
@@ -105,7 +105,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   } else if (tt == "regr") {
     predict.type = NULL
     objective = "reg:linear"
-    eval_metric = match.fun(paste0("autoxgb", toupper(measure$id)))
+    eval_metric = generateXgbEvalFun(measure, tt)
     maximize = !measure$minimize
 
     base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
