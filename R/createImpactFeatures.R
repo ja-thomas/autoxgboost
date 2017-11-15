@@ -24,13 +24,13 @@
 #'   and \code{table(x) / length(x)} for multiclass classification.
 #' @return [\code{list}]: A list with two slots, see description for details.
 #' @export
-createImpactFeatures = function(obj, target = character(0L), cols = NULL, lambda = 0.5) {
+createImpactFeatures = function(obj, target = character(0L), cols = NULL) {
   mlr:::checkTargetPreproc(obj, target, cols)
   UseMethod("createImpactFeatures")
 }
 
 #' @export
-createImpactFeatures.data.frame = function(obj, target, cols = NULL, lambda = 0.5) {
+createImpactFeatures.data.frame = function(obj, target, cols = NULL, slope.param = 10L, trust.param = 10L) {
   # get all factor feature names present in data
   work.cols = colnames(obj)[vlapply(obj, is.factor)]
   work.cols = setdiff(work.cols, target)
@@ -40,8 +40,12 @@ createImpactFeatures.data.frame = function(obj, target, cols = NULL, lambda = 0.
     assertSubset(cols, work.cols)
     work.cols = cols
   }
-
+  
   #create learner to predict probs
+  impact.lambda = function(n, f = slope.param, k = trust.param) {
+    1 / (1 + exp((n - k) / f))
+  }
+  
   value.table = lapply(work.cols, function(col) {
     
     if (is.factor(obj[, target])) {
@@ -52,15 +56,15 @@ createImpactFeatures.data.frame = function(obj, target, cols = NULL, lambda = 0.
       priors = table(obj[target]) / nrow(obj)
       probs = getPredictionProbabilities(mod$pred)
       prob.cols = colnames(probs)
-      
-      new.values = data.frame(lapply(prob.cols, function(col) {
-        nv = NA
+      new.values = data.frame()
+      for (prob.col in prob.cols) {
         for (i in 1:nrow(probs)) {
-          nv[i] = lambda * probs[i, as.character(obj[i, target])] +
-            (1 - lambda) * priors[as.character(obj[i, target])]
+          n = as.numeric(table(obj[col])[as.character(obj[i, col])])
+          new.values[i, prob.col] = impact.lambda(n) * probs[i, prob.col] +
+            (1 - impact.lambda(n)) * priors[as.character(obj[i, target])]
         }
-        return(nv)
-      }))
+      }
+      
       colnames(new.values) = paste0(col, ".imp.", colnames(probs))
       return(new.values)
     } else {
@@ -91,7 +95,7 @@ createImpactFeatures.data.frame = function(obj, target, cols = NULL, lambda = 0.
 }
 
 #' @export
-createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, lambda = 0.5) {
+createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL) {
   target = getTaskTargetNames(obj)
   tt = getTaskType(obj)
 
