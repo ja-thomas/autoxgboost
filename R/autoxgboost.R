@@ -52,9 +52,9 @@
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL,
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), impact.encoding.boundary = 10L, mbo.learner = NULL,
   nthread = NULL, tune.threshold = TRUE) {
-
+  
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
   assertFlag(build.final.model)
@@ -62,7 +62,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
   if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
-  assertChoice(factor.encoder, c("impact", "dummy"))
+  assertIntegerish(impact.encoding.boundary, lower = 0, len = 1L)
   assertIntegerish(nthread, lower = 1, null.ok = TRUE)
   assertFlag(tune.threshold)
 
@@ -104,14 +104,18 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   }
 
   if (has.cat.feats) {
-    if (factor.encoder == "impact") {
-      base.learner = makeImpactFeaturesWrapper(base.learner)
-    } else {
-      task = createDummyFeatures(task)
-    }
+    d = getTaskData(task)
+    d = dropNamed(d, getTaskTargetNames(task))
+    feat.cols = colnames(d)[vlapply(d, is.factor)]
+    impact.cols = colnames(d[, vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)])
+    dummy.cols = setdiff(feat.cols, impact.cols)
+    if (!is.null(impact.cols))
+      task = createImpactFeatures(task, cols = impact.cols)
+    if (!is.null(dummy.cols))
+      task = createDummyFeatures(task, cols = dummy.cols)
   }
 
-
+  
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
 
@@ -141,11 +145,6 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
   lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
-
-  if (has.cat.feats > 0 & factor.encoder == "impact") {
-    lrn = makeImpactFeaturesWrapper(lrn)
-  }
-
 
   mod = if(build.final.model) {
     train(lrn, task)

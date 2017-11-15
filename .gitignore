@@ -6,3 +6,5 @@ html
 .Rproj.user
 xgboost.model
 test.R
+*.RData
+*.Rproj

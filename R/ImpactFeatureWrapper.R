@@ -10,39 +10,19 @@
 #' @inheritParams createImpactFeatures
 #' @return [\code{\link{Learner}}].
 #' @export
-makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
+makeImpactFeaturesWrapper = function(learner, cols = NULL) {
   learner = mlr:::checkLearner(learner)
-  args = list(cols = cols, fun = fun)
+  args = list(cols = cols)
   rm(list = names(args))
 
   trainfun = function(data, target, args) {
-    data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun)
+    data = createImpactFeatures(data, target, cols = args$cols)
     return(list(data = data$data, control = list(value.table = data$value.table)))
   }
 
   predictfun = function(data, target, args, control) {
-
-    value.table = control$value.table
-    work.cols = names(value.table)
-
-    for (wc in work.cols) {
-      tab = value.table[[wc]]
-      if (ncol(tab) == 2) {
-        levels(data[,wc]) = tab[,2]
-        data[,wc] = as.numeric(as.character(data[,wc]))
-      } else { # for multiclass classif
-        new.cols = paste(wc, colnames(tab)[-1], sep = ".")
-        data[, new.cols] = data[, wc]
-        data[, wc] = NULL
-        for(i in seq_along(new.cols)) {
-          data[, new.cols[i]] = as.factor(data[, new.cols[i]])
-          levels(data[, new.cols[i]]) = tab[, i + 1]
-          data[,new.cols[i]] = as.numeric(as.character(data[, new.cols[i]]))
-        }
-      }
-    }
-
-    return(data)
+    data = createImpactFeatures(data, target, cols = args$cols)
+    return(data$data)
   }
 
   lrn = makePreprocWrapper(learner, trainfun, predictfun, par.vals = args)
