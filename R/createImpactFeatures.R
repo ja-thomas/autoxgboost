@@ -24,7 +24,7 @@
 #'   and \code{table(x) / length(x)} for multiclass classification.
 #' @return [\code{list}]: A list with two slots, see description for details.
 #' @export
-createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL) {
+createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 10L, trust.param = 10L) {
   mlr:::checkTargetPreproc(obj, target, cols)
   assertFunction(fun, null.ok = TRUE)
   UseMethod("createImpactFeatures")
