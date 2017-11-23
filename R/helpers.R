@@ -25,3 +25,8 @@ getBestIteration.WrappedModel = function(mod) {
 classOneFraction = function(x) {
   (table(x) / length(x))[1]
 }
+
+# transfer rate for impact encoding between conditional and prior probabilities
+impactEncodingLambda = function(n, slope.param, trust.param) {
+  1 / (1 + exp((n - trust.param) / slope.param))
+}

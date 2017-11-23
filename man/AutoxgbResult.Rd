@@ -12,3 +12,4 @@ Result of \code{\link{autoxgboost}}. A list containing the following elements:
   \item{measure [\code{\link[mlr]{Measure}}]}{Measure used for optimization.}
 }
 }
+

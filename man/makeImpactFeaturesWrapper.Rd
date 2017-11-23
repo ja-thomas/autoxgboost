@@ -26,3 +26,4 @@ and \code{table(x) / length(x)} for multiclass classification.}
 Fuses a base learner with the impact feature creator (see \code{\link{createImpactFeatures}}).
 Returns a learner which can be used like any other learner.
 }
+

@@ -31,7 +31,7 @@ createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = 
 }
 
 #' @export
-createImpactFeatures.data.frame = function(obj, target = character(0L), cols = NULL, fun = NULL) {
+createImpactFeatures.data.frame = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 10L, trust.param = 10L) {
   # get all factor feature names present in data
   work.cols = colnames(obj)[vlapply(obj, is.factor)]
   work.cols = setdiff(work.cols, target)
@@ -39,11 +39,9 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
 
   if (is.null(fun)) {
     if (is.numeric(obj[,target])) {
-     fun = mean
-    } else if (length(unique(obj[,target])) > 2) {
-      fun = function(x) table(x) / length(x)
-    } else {
-      fun = function(x) table(x)[1] / length(x)
+      fun = mean # regression
+    } else { 
+      fun = function(x) table(x) / length(x) # classification
     }
   }
 
@@ -60,7 +58,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
     res = data.frame(lapply(res, as.data.frame)) #FIXME: Change all of that to data.table
 
     colnames(res) = if(ncol(res) <= 2) c(col, target) else c(col, levels(obj[, target]))
-
+    
     #attach missing levels
     miss.frame = data.frame(setdiff(levels(res[,1]), res[,1]))
     colnames(miss.frame) = col
@@ -69,32 +67,46 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
 
   })
   names(value.table) = work.cols
-  #replace values in the data
+  
+  # prior probabilities
+  priors = table(obj[target]) / nrow(obj)
+  
+  # replace values in the data
   for (wc in work.cols) {
-
     tab = value.table[[wc]]
-    if (ncol(tab) == 2) {#regression or binary classif
-      levels(obj[, wc]) = tab[, 2]
-      obj[, wc] = as.numeric(as.character(obj[, wc]))
-    } else { # for multiclass classif
-      new.cols = paste(wc, colnames(tab)[-1], sep = ".")
-      obj[, new.cols] = obj[, wc] #FIXME this converts all new.cols columns to character... annoying
+    if (is.numeric(obj[, target])) {#regression
+      cond = obj[, wc]
+      levels(cond) = tab[, 2]
+      n = as.numeric(table(obj[, wc])[as.character(obj[, wc])])
+      obj[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(cond)) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * mean(obj[, target])
+    } else { # for classif
+      new.cols = paste(wc, tab[, 1], sep = ".")
+      obj[, new.cols] = obj[, target] #FIXME this converts all new.cols columns to character... annoying
       obj[, wc] = NULL
       for(i in seq_along(new.cols)) {
-          obj[,new.cols[i]] = as.factor(obj[,new.cols[i]]) # see above
-          levels(obj[, new.cols[i]]) = tab[, i + 1]
-          obj[, new.cols[i]] = as.numeric(as.character(obj[,new.cols[i]]))
+        col = as.factor(obj[, new.cols[i]])
+        levels(col) = priors[sort(names(priors))]
+        prior = as.numeric(as.character(col))
+        col = as.factor(obj[, new.cols[i]])
+        levels(col) = as.numeric(tab[i, sort(colnames(tab[i, -1]))])
+        cond = as.numeric(as.character(col))
+        n = as.numeric(table(obj[, new.cols[i]])[as.character(obj[, new.cols[i]])])
+        # new values
+        obj[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * cond + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior
       }
     }
   }
-
+  
+  prior.table = table(obj[target]) / nrow(obj)
+  
   return(list(
     data = obj,
-    value.table = value.table))
+    value.table = value.table,
+    prior.table = prior.table))
 }
 
 #' @export
-createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL) {
+createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 10L, trust.param = 10L) {
   target = getTaskTargetNames(obj)
   tt = getTaskType(obj)
 
@@ -102,18 +114,16 @@ createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, f
     if (tt == "regr") {
       fun = mean
     } else if (tt == "classif") {
-      if (length(getTaskClassLevels(obj)) > 2) {
-        fun = function(x) table(x) / length(x)
-      } else {
-        fun = function(x) table(x)[1] / length(x)
-        }
-      } else
-    stopf("Task must be 'classif or 'regr', but is %s", tt)
+      fun = function(x) table(x) / length(x)
+    } else {
+      stopf("Task must be 'classif or 'regr', but is %s", tt)
+    }
   }
 
-  d = createImpactFeatures.data.frame(obj = getTaskData(obj), target = target, cols = cols, fun = fun)
+  d = createImpactFeatures.data.frame(obj = getTaskData(obj), target = target, 
+    cols = cols, fun = fun, slope.param = slope.param, trust.param = trust.param)
   return(list(
     data = mlr:::changeData(obj, d$data),
-    value.table = d$value.table))
-
+    value.table = d$value.table),
+    prior.table = d$prior.table)
 }

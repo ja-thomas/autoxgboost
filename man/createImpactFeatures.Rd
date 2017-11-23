@@ -4,7 +4,8 @@
 \alias{createImpactFeatures}
 \title{Generate impact encoded numeric variables for factor features.}
 \usage{
-createImpactFeatures(obj, target = character(0L), cols = NULL, fun = NULL)
+createImpactFeatures(obj, target = character(0L), cols = NULL, fun = NULL,
+  slope.param = 10L, trust.param = 10L)
 }
 \arguments{
 \item{obj}{[\code{data.frame} | \code{\link{Task}}]\cr
@@ -36,3 +37,4 @@ or a \code{task}, depending on the passed object. A list named \code{value.table
 data.frames of the replacement values, where the first column are the feature levels, and all further
 columns the results of \code{fun}.
 }
+
