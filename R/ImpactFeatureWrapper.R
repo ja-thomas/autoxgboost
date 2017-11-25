@@ -17,55 +17,34 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
 
   trainfun = function(data, target, args) {
     data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun)
-    return(list(data = data$data, control = list(value.table = data$value.table, prior.table = data$prior.table)))
+    return(list(data = data$data, control = list(value.table = data$value.table,
+      prior.table = data$prior.table, slope.param = data$slope.param, trust.param = data$trust.param)))
   }
 
   predictfun = function(data, target, args, control) {
 
     value.table = control$value.table
     prior.table = control$prior.table
+    slope.param = control$slope.param
+    trust.param = control$trust.param
     work.cols = names(value.table)
 
     for (wc in work.cols) {
-    # tab = value.table[[wc]]
-    # if (ncol(tab) == 2) {
-    #   levels(data[,wc]) = tab[,2]
-    #   data[,wc] = as.numeric(as.character(data[,wc]))
-    #   } else { # for multiclass classif
-    #     new.cols = paste(wc, colnames(tab)[-1], sep = ".")
-    #     data[, new.cols] = data[, wc]
-    #     data[, wc] = NULL
-    #     for(i in seq_along(new.cols)) {
-    #       data[, new.cols[i]] = as.factor(data[, new.cols[i]])
-    #       levels(data[, new.cols[i]]) = tab[, i + 1]
-    #       data[,new.cols[i]] = as.numeric(as.character(data[, new.cols[i]]))
-    #     }
-    #   }
-    # }
-      
       tab = value.table[[wc]]
-      if (learner$type == "regr") {#regression
-        cond = data[, wc]
-        levels(cond) = tab[, 2]
-        col = as.factor(data[, wc])
-        levels(col) = prior.table[sort(names(prior.table))]
-        prior = as.numeric(as.character(col))
+      if (ncol(tab) == 2) {# regression or binary classif
+        data[, wc] = as.factor(data[, wc])
+        levels(data[, wc]) = tab[, 2]
         n = as.numeric(table(data[, wc])[as.character(data[, wc])])
-        data[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(cond)) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior
-      } else { # for classif
-        new.cols = paste(wc, tab[, 1], sep = ".")
-        data[, new.cols] = data[, wc] #FIXME this converts all new.cols columns to character... annoying
+        data[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(data[, wc])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table
+      } else { # multiclass classif
+        new.cols = paste(wc, colnames(tab[, -1]), sep = ".")
+        data[, new.cols] = data[, wc]
         data[, wc] = NULL
         for(i in seq_along(new.cols)) {
-          col = as.factor(data[, new.cols[i]])
-          levels(col) = prior.table[sort(names(prior.table))]
-          prior = as.numeric(as.character(col))
-          col = as.factor(data[, new.cols[i]])
-          levels(col) = as.numeric(tab[i, sort(colnames(tab[i, -1]))])
-          cond = as.numeric(as.character(col))
+          data[, new.cols[i]] = as.factor(data[, new.cols[i]])
+          levels(data[, new.cols[i]]) = tab[order(as.character(tab[, 1])), i + 1]
           n = as.numeric(table(data[, new.cols[i]])[as.character(data[, new.cols[i]])])
-          # new values
-          data[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * cond + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior
+          data[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(data[, new.cols[i]])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table[i]
         }
       }
     }

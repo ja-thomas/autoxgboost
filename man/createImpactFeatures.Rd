@@ -5,7 +5,7 @@
 \title{Generate impact encoded numeric variables for factor features.}
 \usage{
 createImpactFeatures(obj, target = character(0L), cols = NULL, fun = NULL,
-  slope.param = 10L, trust.param = 10L)
+  slope.param = 100L, trust.param = 100L)
 }
 \arguments{
 \item{obj}{[\code{data.frame} | \code{\link{Task}}]\cr

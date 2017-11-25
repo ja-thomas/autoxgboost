@@ -62,7 +62,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
   if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
-  assertIntegerish(impact.encoding.boundary, lower = 0, len = 1L)
+  if (is.infinite(impact.encoding.boundary) == TRUE)
+    impact.encoding.boundary = .Machine$integer.max
+  assertIntegerish(impact.encoding.boundary, lower = 0, upper = Inf, len = 1L)
   assertIntegerish(nthread, lower = 1, null.ok = TRUE)
   assertFlag(tune.threshold)
 
@@ -109,9 +111,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     feat.cols = colnames(d)[vlapply(d, is.factor)]
     impact.cols = colnames(d[, vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)])
     dummy.cols = setdiff(feat.cols, impact.cols)
-    if (!is.null(dummy.cols))
-      task = createDummyFeatures(task, cols = dummy.cols)
-    if (!is.null(impact.cols))
+    if (length(dummy.cols) != 0L)
+      base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
+    if (length(impact.cols) != 0L)
       base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
   }
 

@@ -12,14 +12,14 @@ Depends:
     mlr (>= 2.11),
     ParamHelpers (>= 1.10),
     smoof (>= 1.4),
-    mlrMBO (>= 1.0.0)
+    mlrMBO (>= 1.0.0),
+    GenSA
 Imports:
     BBmisc (>= 1.11),
     checkmate (>= 1.8.2),
     stringi,
     DiceKriging,
-    xgboost (>= 0.6.4),
-    GenSA
+    xgboost (>= 0.6.4)
 Suggests:
     testthat,
     rpart,

@@ -9,17 +9,8 @@ getThreshold = function(optim.result) {
 
 #get the iteration parameter of a fitted xboost model with early stopping
 getBestIteration = function(mod) {
-  UseMethod("getBestIteration")
+  getLearnerModel(mod, more.unwrap = TRUE)$best_iteration
 }
-
-getBestIteration.PreprocModel = function(mod) {
-  mod$learner.model$next.model$learner.model$best_iteration
-}
-
-getBestIteration.WrappedModel = function(mod) {
-  mod$learner.model$best_iteration
-}
-
 
 #relative frequency of first factor level
 classOneFraction = function(x) {
@@ -28,5 +19,5 @@ classOneFraction = function(x) {
 
 # transfer rate for impact encoding between conditional and prior probabilities
 impactEncodingLambda = function(n, slope.param, trust.param) {
-  1 / (1 + exp((n - trust.param) / slope.param))
+  1 / (1 + exp(-((n - trust.param) / slope.param)))
 }

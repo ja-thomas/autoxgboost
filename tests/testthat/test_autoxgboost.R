@@ -6,8 +6,8 @@ checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, c
     td = getTaskDesc(task)
 
     expect_class(r, "AutoxgbResult")
-    if (sum(td$n.feat[c("factors", "ordered")]) > 0 & factor.encoder == "impact") {
-      expect_class(r$final.learner, "ImpactFeatureWrapper")
+    if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+      expect_class(r$final.learner, "PreprocWrapper") 
     } else {
       expect_class(r$final.learner, "RLearner")
     }
@@ -50,6 +50,6 @@ test_that("autoxgboost works on different tasks",  {
 })
 
 test_that("autoxgboost thresholding works",  {
-  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, impact.encoding.boundary = 0L, control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
-  checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = 0L, control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, impact.encoding.boundary = Inf, control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = Inf, control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
 })

@@ -24,25 +24,36 @@
 #'   and \code{table(x) / length(x)} for multiclass classification.
 #' @return [\code{list}]: A list with two slots, see description for details.
 #' @export
-createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 10L, trust.param = 10L) {
+createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
   mlr:::checkTargetPreproc(obj, target, cols)
   assertFunction(fun, null.ok = TRUE)
   UseMethod("createImpactFeatures")
 }
 
 #' @export
-createImpactFeatures.data.frame = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 10L, trust.param = 10L) {
+createImpactFeatures.data.frame = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
   # get all factor feature names present in data
   work.cols = colnames(obj)[vlapply(obj, is.factor)]
   work.cols = setdiff(work.cols, target)
 
-
+  # aggregation function
   if (is.null(fun)) {
-    if (is.numeric(obj[,target])) {
+    if (is.numeric(obj[, target])) {
       fun = mean # regression
+    } else if (length(unique(obj[, target])) > 2) {
+      fun = function(x) table(x) / length(x) # multiclass classification
     } else { 
-      fun = function(x) table(x) / length(x) # classification
+      fun = function(x) table(x)[1] / length(x) # binary classification
     }
+  }
+  
+  # prior table
+  if (is.numeric(obj[, target])) {
+    prior.table = mean(obj[, target]) # regression
+  } else if (length(unique(obj[, target])) > 2) {
+    prior.table = table(obj[, target]) / nrow(obj) # multiclass classification
+  } else { 
+    prior.table = (table(obj[, target]) / nrow(obj))[1] # binary classification
   }
 
   # check that user requested cols are only factor cols
@@ -68,45 +79,40 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
   })
   names(value.table) = work.cols
   
-  # prior probabilities
-  priors = table(obj[target]) / nrow(obj)
-  
+
   # replace values in the data
   for (wc in work.cols) {
     tab = value.table[[wc]]
-    if (is.numeric(obj[, target])) {#regression
-      cond = obj[, wc]
-      levels(cond) = tab[, 2]
+    if (ncol(tab) == 2) {# regression or binary classif
+      obj[, wc] = as.factor(obj[, wc])
+      levels(obj[, wc]) = tab[, 2]
       n = as.numeric(table(obj[, wc])[as.character(obj[, wc])])
-      obj[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(cond)) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * mean(obj[, target])
-    } else { # for classif
-      new.cols = paste(wc, tab[, 1], sep = ".")
-      obj[, new.cols] = obj[, target] #FIXME this converts all new.cols columns to character... annoying
+      obj[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(obj[, wc])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table
+    } else { # multiclass classif
+      new.cols = paste(wc, colnames(tab[, -1]), sep = ".")
+      obj[, new.cols] = obj[, wc]
       obj[, wc] = NULL
       for(i in seq_along(new.cols)) {
-        col = as.factor(obj[, new.cols[i]])
-        levels(col) = priors[sort(names(priors))]
-        prior = as.numeric(as.character(col))
-        col = as.factor(obj[, new.cols[i]])
-        levels(col) = as.numeric(tab[i, sort(colnames(tab[i, -1]))])
-        cond = as.numeric(as.character(col))
+        obj[, new.cols[i]] = as.factor(obj[, new.cols[i]])
+        levels(obj[, new.cols[i]]) = tab[order(as.character(tab[, 1])), i + 1]
         n = as.numeric(table(obj[, new.cols[i]])[as.character(obj[, new.cols[i]])])
-        # new values
-        obj[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * cond + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior
+        obj[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(obj[, new.cols[i]])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table[i]
       }
     }
   }
   
-  prior.table = table(obj[target]) / nrow(obj)
+
   
   return(list(
     data = obj,
     value.table = value.table,
-    prior.table = prior.table))
+    prior.table = prior.table,
+    slope.param = slope.param,
+    trust.param = trust.param))
 }
 
 #' @export
-createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 10L, trust.param = 10L) {
+createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
   target = getTaskTargetNames(obj)
   tt = getTaskType(obj)
 
@@ -114,16 +120,21 @@ createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, f
     if (tt == "regr") {
       fun = mean
     } else if (tt == "classif") {
-      fun = function(x) table(x) / length(x)
-    } else {
+      if (length(getTaskClassLevels(obj)) > 2) {
+        fun = function(x) table(x) / length(x)
+      } else {
+        fun = function(x) table(x)[1] / length(x)
+      }
+    } else
       stopf("Task must be 'classif or 'regr', but is %s", tt)
-    }
   }
 
   d = createImpactFeatures.data.frame(obj = getTaskData(obj), target = target, 
     cols = cols, fun = fun, slope.param = slope.param, trust.param = trust.param)
   return(list(
     data = mlr:::changeData(obj, d$data),
-    value.table = d$value.table),
-    prior.table = d$prior.table)
+    value.table = d$value.table,
+    prior.table = d$prior.table,
+    slope.param = d$slope.param,
+    trust.param = d$trust.param))
 }
