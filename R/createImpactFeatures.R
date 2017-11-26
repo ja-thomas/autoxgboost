@@ -5,7 +5,7 @@
 #' For binary classification a factor level \eqn{x_i} of a factor feature \eqn{X} is replaced by
 #' \deqn{x^\ast_i = \lambda(n_{x_i})\cdot P(Y|X=x_i) + (1-\lambda(n_{x_i}))\cdot P(Y),}
 #' where \eqn{n_{x_i}=\#\{x_i\in X\}} and 
-#' \deqn{\lambda(n) = \frac{1}{1 + \exp^{-\frac{(n- \text{trust.param})}{\text{slope.param}}}}}
+#' \deqn{\lambda(n) = \frac{1}{1 + \exp^{-\frac{(n - trust.param)}{slope.param}}}}
 #' describes the transition rate between between the conditional probability of a factor level 
 #' and the prior probability of the class levels (classification), or the average of the target 
 #' variable for each factor level (regression).
