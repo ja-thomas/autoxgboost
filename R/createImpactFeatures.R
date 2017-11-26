@@ -29,13 +29,15 @@
 #' @param cols [\code{character}]\cr
 #'   Columns to create impact features for. Default is to use all columns.
 #' @param fun [\code{function}]\cr
-#'   Function to apply to the response for each factor level in order to obtain the conditional probabilities for each factor level, should always return a numeric vector.
+#'   Function to apply to the response for each factor level in order to obtain the 
+#'   conditional probabilities for each factor level, should always return a numeric vector.
 #'   If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
 #'   and \code{table(x) / length(x)} for multiclass classification.
 #' @param slope.param [\code{integer}]\cr
-#'   Controls the rate of transition rate \eqn{\lambda}
+#'   Controls the rate of transition rate \eqn{\lambda}. Default is \code{100L}.
 #' @param trust.param [\code{integer}]\cr
-#'   Determines half of the minimal sample size for which we completely "trust" the conditional probability of a factor level. 
+#'   Determines half of the minimal sample size for which we completely "trust" the conditional 
+#'   probability of a factor level. Default is \code{100L}
 #' @return [\code{list}]: A list with four slots, see description for details.
 #' @export
 createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
