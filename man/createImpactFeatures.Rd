@@ -56,4 +56,3 @@ or a \code{task}, depending on the passed object. A list named \code{value.table
 data.frames of the conditional probabilities or means aggregated by \code{fun}.
 Moreover, the values of \code{slope.param} and \code{trust.params} are returned.
 }
-

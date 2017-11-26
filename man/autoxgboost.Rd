@@ -76,4 +76,3 @@ For the optimization itself bayesian optimization with \pkg{mlrMBO} is used.
 Without any specification of the control object, the optimizer runs for for 80 iterations or 1 hour, whatever happens first.
 Both the parameter set and the control object can be set by the user.
 }
-

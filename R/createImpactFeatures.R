@@ -122,9 +122,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
   return(list(
     data = obj,
     value.table = value.table,
-    prior.table = prior.table,
-    slope.param = slope.param,
-    trust.param = trust.param))
+    prior.table = prior.table))
 }
 
 #' @export
@@ -150,7 +148,5 @@ createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, f
   return(list(
     data = mlr:::changeData(obj, d$data),
     value.table = d$value.table,
-    prior.table = d$prior.table,
-    slope.param = d$slope.param,
-    trust.param = d$trust.param))
+    prior.table = d$prior.table))
 }

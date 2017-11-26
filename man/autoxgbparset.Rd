@@ -18,4 +18,3 @@ This is the default parameter set for xgboost that is used for tuning if no cost
    \item{subsample}{Subsample fraction: Between \code{0.5} and \code{1}.}
 }
 }
-

@@ -10,7 +10,8 @@
 #' @inheritParams createImpactFeatures
 #' @return [\code{\link{Learner}}].
 #' @export
-makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
+makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL,
+  slope.param = 100L, trust.param = 100L) {
   learner = mlr:::checkLearner(learner)
   args = list(cols = cols, fun = fun)
   rm(list = names(args))
@@ -18,15 +19,13 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
   trainfun = function(data, target, args) {
     data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun)
     return(list(data = data$data, control = list(value.table = data$value.table,
-      prior.table = data$prior.table, slope.param = data$slope.param, trust.param = data$trust.param)))
+      prior.table = data$prior.table)))
   }
 
   predictfun = function(data, target, args, control) {
 
     value.table = control$value.table
     prior.table = control$prior.table
-    slope.param = control$slope.param
-    trust.param = control$trust.param
     work.cols = names(value.table)
 
     for (wc in work.cols) {
