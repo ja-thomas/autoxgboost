@@ -22,7 +22,7 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.par
   
   trainfun = function(data, target, args) {
     data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun,
-      slope.param = args$slope.param, trust.param = args$trust.param))
+      slope.param = args$slope.param, trust.param = args$trust.param)
 return(list(data = data$data, control = list(value.table = data$value.table,
   prior.table = data$prior.table)))
   }
