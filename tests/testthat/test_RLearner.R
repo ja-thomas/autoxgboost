@@ -3,7 +3,8 @@ context("RLearner autoxgboost")
 test_that("classif.autoxgboost works", {
 
   #response + binary classif
-  lrn = makeLearner("classif.autoxgboost", control = ctrl, mbo.learner = mbo.learner, predict.type = "response", nthread = 1, tune.threshold = FALSE)
+  lrn = makeLearner("classif.autoxgboost", control = ctrl, mbo.learner = mbo.learner,
+    predict.type = "response", nthread = 1, tune.threshold = FALSE)
   res = holdout(lrn, sonar.task)
   expect_equal(c(70, 5), dim(res$pred$data))
 
@@ -12,7 +13,8 @@ test_that("classif.autoxgboost works", {
   expect_equal(c(50, 5), dim(res$pred$data))
 
   #prob + binary
-  lrn = makeLearner("classif.autoxgboost", control = ctrl, mbo.learner = mbo.learner, predict.type = "prob", nthread = 1, tune.threshold = FALSE)
+  lrn = makeLearner("classif.autoxgboost", control = ctrl, mbo.learner = mbo.learner,
+    predict.type = "prob", nthread = 1, tune.threshold = FALSE)
   res = holdout(lrn, sonar.task)
   expect_equal(c(70, 7), dim(res$pred$data))
 

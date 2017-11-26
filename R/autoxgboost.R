@@ -113,8 +113,14 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     dummy.cols = setdiff(feat.cols, impact.cols)
     if (length(dummy.cols) != 0L)
       base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
-    if (length(impact.cols) != 0L)
+    if (length(impact.cols) != 0L) {
       base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
+      par.set$pars$slope.param = makeIntegerParam("slope.param", lower = 0L, upper = 2^12)
+      par.set$pars$trust.param = makeIntegerParam("trust.param", lower = 0L, upper = 2^12)
+    }
+  } else {
+    impact.cols = character(0L)
+    dummy.cols = character(0L)
   }
 
 
@@ -146,15 +152,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
-  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
-
-  if (has.cat.feats > 0) {
-    if (!is.null(dummy.cols))
-      lrn = makeDummyFeaturesWrapper(lrn, cols = dummy.cols)
-    if (!is.null(impact.cols))
-      lrn = makeImpactFeaturesWrapper(lrn, cols = impact.cols)
-  }
-
+  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set, 
+    dummy.cols = dummy.cols, impact.cols = impact.cols)
 
   mod = if(build.final.model) {
     train(lrn, task)

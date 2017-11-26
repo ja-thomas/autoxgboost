@@ -17,14 +17,29 @@
 #' @export
 makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
   learner = mlr:::checkLearner(learner)
-  args = list(cols = cols, fun = fun, slope.param = slope.param, trust.param = trust.param)
+  
+  args = list(cols = cols, fun = fun)
+  
+  
+  if (!missing(slope.param) & !missing(trust.param)) {
+    assertInteger(slope.param, lower = 0, any.missing = FALSE)
+    assertInteger(trust.param, lower = 0, any.missing = FALSE)
+    args$slope.param = slope.param
+    args$trust.param = trust.param
+  }
+  
   rm(list = names(args))
+  
+  ps = makeParamSet(
+    makeIntegerParam(id = "slope.param", lower = 0, upper = Inf),
+    makeIntegerParam(id = "trust.param", lower = 0, upper = Inf)
+  )
   
   trainfun = function(data, target, args) {
     data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun,
       slope.param = args$slope.param, trust.param = args$trust.param)
-return(list(data = data$data, control = list(value.table = data$value.table,
-  prior.table = data$prior.table)))
+    return(list(data = data$data, control = list(value.table = data$value.table,
+      prior.table = data$prior.table)))
   }
   
   predictfun = function(data, target, args, control) {
@@ -56,7 +71,7 @@ return(list(data = data$data, control = list(value.table = data$value.table,
     return(data)
   }
   
-  lrn = makePreprocWrapper(learner, trainfun, predictfun, par.vals = args)
+  lrn = makePreprocWrapper(learner, trainfun, predictfun, par.set = ps, par.vals = args)
   lrn$id = stringi::stri_replace(lrn$id, replacement = ".impact", regex = "\\.preproc$")
   addClasses(lrn, "ImpactFeatureWrapper")
   
