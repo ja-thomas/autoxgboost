@@ -53,7 +53,7 @@
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE) {
+  nthread = NULL, tune.threshold = TRUE, validation.data = NULL) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
@@ -114,22 +114,25 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
-
+      extras = list()
       lrn = setHyperPars(base.learner, par.vals = x)
       mod = train(lrn, task)
       test = subsetTask(task, subset = mod$learner.model$test.inds)
       pred = predict(mod, test)
-      nrounds = getBestIteration(mod)
-
+      extras$nrounds = getBestIteration(mod)
       if (tune.threshold && tt == "classif") {
         tune.res = tuneThreshold(pred = pred, measure = measure)
         res = tune.res$perf
-        attr(res, "extras") = list(nrounds = nrounds, .threshold = tune.res$th)
+        extras[[".threshold"]] = tune.res$th
       } else {
         res = performance(pred, measure)
-        attr(res, "extras") = list(nrounds = nrounds)
       }
 
+      if(!is.null(validation.data)) {
+        extras$oob.perf = performance(predict(mod, validation.data), measure = measure)
+      }
+
+      attr(res, "extras") = extras
       res
 
     }, par.set = par.set, noisy = TRUE, has.simple.signature = FALSE, minimize = measure$minimize)

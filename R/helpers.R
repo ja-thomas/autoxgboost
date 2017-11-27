@@ -25,3 +25,13 @@ getBestIteration.WrappedModel = function(mod) {
 classOneFraction = function(x) {
   (table(x) / length(x))[1]
 }
+
+brierObservationWise = function(pred) {
+
+  positive = pred$task.desc$positive
+  probabilities = pred$data[, paste0("prob.", positive)]
+
+   y = as.numeric(pred$data$truth == positive)
+   return((y - probabilities)^2)
+
+}
