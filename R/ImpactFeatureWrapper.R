@@ -38,7 +38,7 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.par
     return(list(data = data$data, control = list(value.table = data$value.table,
       prior.table = data$prior.table)))
   }
-  
+
   predictfun = function(data, target, args, control) {
 
     value.table = control$value.table
