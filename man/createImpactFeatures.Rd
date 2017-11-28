@@ -24,8 +24,8 @@ conditional probabilities for each factor level, should always return a numeric 
 If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
 and \code{table(x) / length(x)} for multiclass classification.}
 
-\item{slope.param}{[\code{integer}]\cr
-Controls the rate of transition rate \eqn{\lambda}. Default is \code{100L}.}
+\item{slope.param}{[\code{numeric}]\cr
+Controls the rate of transition \eqn{\lambda} (see \code{\link{createImpactFeatures}}). Default is \code{100L}.}
 
 \item{trust.param}{[\code{integer}]\cr
 Determines half of the minimal sample size for which we completely "trust" the conditional 
@@ -35,7 +35,7 @@ probability of a factor level. Default is \code{100L}}
 [\code{list}]: A list with four slots, see description for details.
 }
 \description{
-Replace all factor features with impact encoded versions following the method of Daniele Micci-Barreca.
+Replace all factor features with impact encoded versions following the method of Daniele Micci-Barreca (see \url{http://dl.acm.org/citation.cfm?id=507538}).
 For binary classification a factor level \eqn{x_i} of a factor feature \eqn{X} is replaced by
 \deqn{x^\ast_i = \lambda(n_{x_i})\cdot P(Y|X=x_i) + (1-\lambda(n_{x_i}))\cdot P(Y),}
 where \eqn{n_{x_i}=\#\{x_i\in X\}} and 

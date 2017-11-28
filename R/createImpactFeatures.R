@@ -1,7 +1,7 @@
 #' @title Generate impact encoded numeric variables for factor features.
 #'
 #' @description
-#' Replace all factor features with impact encoded versions following the method of Daniele Micci-Barreca.
+#' Replace all factor features with impact encoded versions following the method of Daniele Micci-Barreca (see \url{http://dl.acm.org/citation.cfm?id=507538}).
 #' For binary classification a factor level \eqn{x_i} of a factor feature \eqn{X} is replaced by
 #' \deqn{x^\ast_i = \lambda(n_{x_i})\cdot P(Y|X=x_i) + (1-\lambda(n_{x_i}))\cdot P(Y),}
 #' where \eqn{n_{x_i}=\#\{x_i\in X\}} and 
@@ -33,8 +33,8 @@
 #'   conditional probabilities for each factor level, should always return a numeric vector.
 #'   If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
 #'   and \code{table(x) / length(x)} for multiclass classification.
-#' @param slope.param [\code{integer}]\cr
-#'   Controls the rate of transition rate \eqn{\lambda}. Default is \code{100L}.
+#' @param slope.param [\code{numeric}]\cr
+#'   Controls the rate of transition \eqn{\lambda} (see \code{\link{createImpactFeatures}}). Default is \code{100L}.
 #' @param trust.param [\code{integer}]\cr
 #'   Determines half of the minimal sample size for which we completely "trust" the conditional 
 #'   probability of a factor level. Default is \code{100L}
@@ -43,6 +43,8 @@
 createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
   mlr:::checkTargetPreproc(obj, target, cols)
   assertFunction(fun, null.ok = TRUE)
+  assertNumeric(slope.param, lower = 0, any.missing = FALSE)
+  assertNumeric(trust.param, lower = 0, any.missing = FALSE)
   UseMethod("createImpactFeatures")
 }
 
@@ -85,7 +87,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
     res = data.frame(lapply(res, as.data.frame)) #FIXME: Change all of that to data.table
 
     colnames(res) = if(ncol(res) <= 2) c(col, target) else c(col, levels(obj[, target]))
-    
+
     #attach missing levels
     miss.frame = data.frame(setdiff(levels(res[,1]), res[,1]))
     colnames(miss.frame) = col
@@ -101,17 +103,17 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
     tab = value.table[[wc]]
     if (ncol(tab) == 2) {# regression or binary classif
       obj[, wc] = as.factor(obj[, wc])
-      levels(obj[, wc]) = tab[, 2]
-      n = as.numeric(table(obj[, wc])[as.character(obj[, wc])])
+      levels(obj[, wc]) = tab[, 2] # set factor levels to conditional probabilities (classification) / conditional means (regression)
+      n = as.numeric(table(obj[, wc])[as.character(obj[, wc])]) # vector with absolute frequencies of each factor level
       obj[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(obj[, wc])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table
-    } else { # multiclass classif
+    } else {# multiclass classif
       new.cols = paste(wc, colnames(tab[, -1]), sep = ".")
       obj[, new.cols] = obj[, wc]
       obj[, wc] = NULL
-      for(i in seq_along(new.cols)) {
+      for (i in seq_along(new.cols)) {
         obj[, new.cols[i]] = as.factor(obj[, new.cols[i]])
-        levels(obj[, new.cols[i]]) = tab[order(as.character(tab[, 1])), i + 1]
-        n = as.numeric(table(obj[, new.cols[i]])[as.character(obj[, new.cols[i]])])
+        levels(obj[, new.cols[i]]) = tab[order(as.character(tab[, 1])), i + 1] # set factor levels to conditional probabilities
+        n = as.numeric(table(obj[, new.cols[i]])[as.character(obj[, new.cols[i]])]) # vector with absolute frequencies of each factor level
         obj[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(obj[, new.cols[i]])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table[i]
       }
     }

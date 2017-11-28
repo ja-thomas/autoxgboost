@@ -21,12 +21,12 @@ conditional probabilities for each factor level, should always return a numeric 
 If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
 and \code{table(x) / length(x)} for multiclass classification.}
 
-\item{slope.param}{[\code{integer}]\cr
-Controls the rate of transition rate \eqn{\lambda}. Default is \code{100L}.}
+\item{slope.param}{[\code{numeric}]\cr
+Controls the rate of transition \eqn{\lambda} (see \code{\link{createImpactFeatures}}). Default is \code{100L}.}
 
-\item{trust.param}{[\code{integer}]\cr
+\item{trust.param}{[\code{numeric}]\cr
 Determines half of the minimal sample size for which we completely "trust" the conditional 
-probability of a factor level. Default is \code{100L}}
+probability of a factor level (see \code{\link{createImpactFeatures}}). Default is \code{100L}}
 }
 \value{
 [\code{\link{Learner}}].

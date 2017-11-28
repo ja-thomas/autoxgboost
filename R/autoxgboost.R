@@ -36,8 +36,8 @@
 #'   If \code{NULL} the full range defined in \code{par.set} is used.
 #'   Default is \code{c(0.5, 0.55)}.
 #' @param impact.encoding.boundary [\code{integer(1)}]\cr
-#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{makeImpactFeaturesWrapper}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-#'   (see \code{\link[mlr]{createDummyFeatures}}).
+#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+#'   (see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
 #'   Default is \code{10L}.
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
@@ -106,8 +106,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   }
 
   if (has.cat.feats) {
-    d = getTaskData(task)
-    d = dropNamed(d, getTaskTargetNames(task))
+    d = getTaskData(task, target.extra = TRUE)$data
     feat.cols = colnames(d)[vlapply(d, is.factor)]
     impact.cols = colnames(d[, vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)])
     dummy.cols = setdiff(feat.cols, impact.cols)
@@ -115,8 +114,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
       base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
     if (length(impact.cols) != 0L) {
       base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
-      par.set$pars$slope.param = makeIntegerParam("slope.param", lower = 0L, upper = 2^12)
-      par.set$pars$trust.param = makeIntegerParam("trust.param", lower = 0L, upper = 2^12)
+      par.set = c(par.set, autoxgboost::impactencodingparset)
     }
   } else {
     impact.cols = character(0L)

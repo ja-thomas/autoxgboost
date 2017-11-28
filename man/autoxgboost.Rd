@@ -50,8 +50,8 @@ If \code{NULL} the full range defined in \code{par.set} is used.
 Default is \code{c(0.5, 0.55)}.}
 
 \item{impact.encoding.boundary}{[\code{integer(1)}]\cr
-Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{makeImpactFeaturesWrapper}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-(see \code{\link[mlr]{createDummyFeatures}}).
+Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+(see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
 Default is \code{10L}.}
 
 \item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
