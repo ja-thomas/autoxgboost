@@ -17,7 +17,7 @@
 #' \deqn{x^\ast_i = \lambda(n_{x_i})\cdot \bar{Y_{x_i}} + (1-\lambda(n_{x_i}))\cdot\bar{Y},}
 #' where \eqn{\bar{Y_{x_i}}} is the mean of all \eqn{Y} for which \eqn{X=x_i}.
 #' Missing factor levels are imputed by the mean of over all other replacements.
-#' Returned is a list with four slots: \code{data}, containing either a \code{data.frame}
+#' Returned is a list with three slots: \code{data}, containing either a \code{data.frame}
 #' or a \code{task}, depending on the passed object. A list named \code{value.table} containing
 #' data.frames of the conditional probabilities or means aggregated by \code{fun}.
 #' Moreover, the prior probabilities of the class levels  are returned in the \code{prior.table}.
