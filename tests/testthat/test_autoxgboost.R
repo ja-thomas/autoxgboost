@@ -1,13 +1,14 @@
 context("autoxgboost")
 
-checkAutoxgboost = function(task, build.final.model, factor.encoder, control, mbo.learner, tune.threshold) {
+checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, control, mbo.learner, tune.threshold) {
     r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L,
-      factor.encoder = factor.encoder, control = control, mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
+      impact.encoding.boundary = impact.encoding.boundary, control = control,
+      mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
     td = getTaskDesc(task)
 
     expect_class(r, "AutoxgbResult")
-    if (sum(td$n.feat[c("factors", "ordered")]) > 0 & factor.encoder == "impact") {
-      expect_class(r$final.learner, "ImpactFeatureWrapper")
+    if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+      expect_class(r$final.learner, "PreprocWrapper") # could be dummyFeaturesWrapper or ImpactFeatures Wrapper. PreprocWrapper is the parent object class
     } else {
       expect_class(r$final.learner, "RLearner")
     }
@@ -41,15 +42,18 @@ test_that("autoxgboost works on different tasks",  {
     iris.fac
   )
 
-  for (im in c("impact", "dummy")) {
+  for (im in c(0L, Inf)) {
     for (t in tasks) {
-      checkAutoxgboost(task = t, build.final.model = TRUE, factor.encoder = im, control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+      checkAutoxgboost(task = t, build.final.model = TRUE, impact.encoding.boundary = im,
+        control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
     }
   }
 
 })
 
 test_that("autoxgboost thresholding works",  {
-  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
-  checkAutoxgboost(task = iris.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, impact.encoding.boundary = Inf,
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = Inf,
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
 })

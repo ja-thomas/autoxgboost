@@ -4,7 +4,8 @@
 \alias{createImpactFeatures}
 \title{Generate impact encoded numeric variables for factor features.}
 \usage{
-createImpactFeatures(obj, target = character(0L), cols = NULL, fun = NULL)
+createImpactFeatures(obj, target = character(0L), cols = NULL, fun = NULL,
+  slope.param = 100, trust.param = 100)
 }
 \arguments{
 \item{obj}{[\code{data.frame} | \code{\link{Task}}]\cr
@@ -18,21 +19,40 @@ Only used when \code{obj} is a data.frame, otherwise ignored.}
 Columns to create impact features for. Default is to use all columns.}
 
 \item{fun}{[\code{function}]\cr
-Function to apply to the response for each factor level, should always return a numeric vector.
+Function to apply to the response for each factor level in order to obtain the 
+conditional probabilities for each factor level, should always return a numeric vector.
 If \code{NULL}, \code{mean} is used for regression, \code{table(x)[1] / length(x)} for binary classification,
 and \code{table(x) / length(x)} for multiclass classification.}
+
+\item{slope.param}{[\code{numeric}]\cr
+Controls the rate of transition \eqn{\lambda} (see \code{\link{createImpactFeatures}}). Default is \code{100L}.}
+
+\item{trust.param}{[\code{integer}]\cr
+Determines half of the minimal sample size for which we completely "trust" the conditional 
+probability of a factor level. Default is \code{100L}}
 }
 \value{
-[\code{list}]: A list with two slots, see description for details.
+[\code{list}]: A list with three slots, see description for details.
 }
 \description{
-Replace all factor features with impact encoded versions. The encoding is defined by \code{fun}.
-\code{fun} is called for each level in a factor and operates on the target values of these observations.
-For regression a common choice is \code{mean()}, i.e., replace each factor level with the average response.
-For binary classification the probability for class one might be a good choice.
+Replace all factor features with impact encoded versions following the method of Daniele Micci-Barreca (see \url{http://dl.acm.org/citation.cfm?id=507538}).
+For binary classification a factor level \eqn{x_i} of a factor feature \eqn{X} is replaced by
+\deqn{x^\ast_i = \lambda(n_{x_i})\cdot P(Y|X=x_i) + (1-\lambda(n_{x_i}))\cdot P(Y),}
+where \eqn{n_{x_i}=\#\{x_i\in X\}} and 
+\deqn{\lambda(n) = \frac{1}{1 + \exp^{-\frac{(n - trust.param)}{slope.param}}}}
+describes the transition rate between between the conditional probability of a factor level 
+and the prior probability of the class levels (classification), or the average of the target 
+variable for each factor level (regression).
+For multiclass classification with \eqn{Y\in\{y_1,\ldots,y_k\}}, i.e. \eqn{k} class levels, 
+this method is extended by creating a new input feature \eqn{X_j} for each class \eqn{j = 1,\ldots,k.}
+Within each n new feature \eqn{X_j}, a factor level \eqn{x_i} is then replaced by
+\deqn{x^\ast_{i,j} = \lambda(n_{x_i})\cdot P(Y=y_j|X=x_i) + (1-\lambda(n_{x_i}))\cdot P(Y=y_j).}
+For regression tasks, we replace a factor level \eqn{x_i} by
+\deqn{x^\ast_i = \lambda(n_{x_i})\cdot \bar{Y_{x_i}} + (1-\lambda(n_{x_i}))\cdot\bar{Y},}
+where \eqn{\bar{Y_{x_i}}} is the mean of all \eqn{Y} for which \eqn{X=x_i}.
 Missing factor levels are imputed by the mean of over all other replacements.
-Returned is a list with two slots: \code{data}, containing either a \code{data.frame}
+Returned is a list with three slots: \code{data}, containing either a \code{data.frame}
 or a \code{task}, depending on the passed object. A list named \code{value.table} containing
-data.frames of the replacement values, where the first column are the feature levels, and all further
-columns the results of \code{fun}.
+data.frames of the conditional probabilities or means aggregated by \code{fun}.
+Moreover, the prior probabilities of the class levels  are returned in the \code{prior.table}.
 }

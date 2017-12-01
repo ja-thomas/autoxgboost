@@ -1,6 +1,7 @@
 # autoxgboost - Automatic tuning and fitting of [xgboost](https://github.com/dmlc/xgboost).
 
 [![Build Status](https://travis-ci.org/ja-thomas/autoxgboost.svg?branch=master)](https://travis-ci.org/ja-thomas/autoxgboost)
+[![Coverage Status](https://coveralls.io/repos/github/ja-thomas/autoxgboost/badge.svg?branch=master)](https://coveralls.io/github/ja-thomas/autoxgboost?branch=master)
 [![CRAN Status Badge](http://www.r-pkg.org/badges/version/autoxgboost)](https://CRAN.R-project.org/package=autoxgboost)
 [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/autoxgboost)](https://cran.rstudio.com/web/packages/autoxgboost/index.html)
 
