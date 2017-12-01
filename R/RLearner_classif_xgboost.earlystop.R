@@ -20,7 +20,7 @@ makeRLearner.classif.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
-      makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5),
+      makeIntegerVectorLearnerParam(id = "early.stopping.data", lower = 0),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
     ),
     properties = c("twoclass", "multiclass", "numerics", "prob", "weights", "missings"),
@@ -32,27 +32,24 @@ makeRLearner.classif.xgboost.earlystop = function() {
 
 #' @export
 trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL,
-  objective = NULL, eval_metric = NULL, early_stopping_rounds = 1, max.nrounds = 10^6, early.stopping.fraction = 4/5, nthread, ...) {
+  objective = NULL, eval_metric = NULL, early_stopping_rounds = 1, max.nrounds = 10^6, early.stopping.data, nthread, ...) {
 
   td = getTaskDesc(.task)
   nc = length(td$class.levels)
   parlist = list(...)
-  
+
   if (is.null(eval_metric))
     eval_metric = ifelse(nc == 2L, "error", "merror")
   parlist$eval_metric = eval_metric
 
-  rdesc = makeResampleDesc("Holdout", stratify = TRUE, split = early.stopping.fraction)
-  rinst = makeResampleInstance(rdesc, .task)
-  train.inds = rinst$train.inds[[1]]
-  test.inds = rinst$test.inds[[1]]
+  train.inds = setdiff(seq_len(getTaskSize(.task)), early.stopping.data)
 
   if (is.null(.weights)) {
-    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, test.inds)))
+    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, early.stopping.data)))
     data = createDMatrixFromTask(subsetTask(.task, train.inds))
   } else {
-    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, test.inds),
-      weights = .weights[test.inds]))
+    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, early.stopping.data),
+      weights = .weights[early.stopping.data]))
     data = createDMatrixFromTask(subsetTask(.task, train.inds),
       weights = .weights[train.inds])
   }
@@ -72,7 +69,6 @@ trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .wei
       mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
       objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
   }
-  mod$test.inds = test.inds
 
   return(mod)
 }

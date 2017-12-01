@@ -80,15 +80,18 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   if (!is.null(nthread))
     pv$nthread = nthread
 
+  rdesc = makeResampleDesc("Holdout", split = early.stopping.fraction)
+  early.stopping.data =  makeResampleInstance(rdesc, task)$test.inds[[1]]
+
   if (tt == "classif") {
 
-    predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold == TRUE, "prob", "response")
+    predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold, "prob", "response")
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
+      max.nrounds = max.nrounds, early.stopping.data = early.stopping.data, par.vals = pv)
 
   } else if (tt == "regr") {
     predict.type = NULL
@@ -97,7 +100,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
     base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
+      max.nrounds = max.nrounds, early.stopping.data = early.stopping.data, par.vals = pv)
 
   } else {
     stop("Task must be regression or classification")
@@ -117,7 +120,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
       lrn = setHyperPars(base.learner, par.vals = x)
       mod = train(lrn, task)
-      test = subsetTask(task, subset = mod$learner.model$test.inds)
+      test = subsetTask(task, subset = early.stopping.data)
       pred = predict(mod, test)
       nrounds = getBestIteration(mod)
 
