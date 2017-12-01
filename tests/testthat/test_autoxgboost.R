@@ -23,6 +23,7 @@ checkAutoxgboost = function(task, build.final.model, factor.encoder, control, mb
 
   }
 
+context("Different Tasks")
 test_that("autoxgboost works on different tasks",  {
 
   iris.fac = droplevels(iris[1:100,])
@@ -49,7 +50,16 @@ test_that("autoxgboost works on different tasks",  {
 
 })
 
+context("Thresholds")
 test_that("autoxgboost thresholding works",  {
   checkAutoxgboost(task = sonar.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
   checkAutoxgboost(task = iris.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+})
+
+context("Weights")
+test_that("weights work", {
+  iris.weighted = makeClassifTask(data = iris, target = "Species", weights = sample(c(1,20), 150, replace = TRUE))
+  bh.weighted = makeRegrTask(data = getTaskData(bh.task)[1:50, -4], target = "medv", weights = sample(c(1,20), 50, replace = TRUE))
+  checkAutoxgboost(task = iris.weighted, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = bh.weighted, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, tune.threshold = FALSE)
 })
