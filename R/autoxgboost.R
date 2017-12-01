@@ -35,10 +35,10 @@
 #'   It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
 #'   If \code{NULL} the full range defined in \code{par.set} is used.
 #'   Default is \code{c(0.5, 0.55)}.
-#' @param factor.encoder [\code{numeric(1)}]\cr
-#'   Defines how factor variables are handled. Either \code{"impact"} for impact encoding (see \code{\link{makeImpactFeaturesWrapper}}).
-#'   Or \code{"dummy"} for Dummy encoding (see \code{\link[mlr]{createDummyFeatures}}).
-#'   Default is \code{"impact"}.
+#' @param impact.encoding.boundary [\code{integer(1)}]\cr
+#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+#'   (see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
+#'   Default is \code{10L}.
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
 #'   If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.
@@ -52,7 +52,7 @@
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), factor.encoder = "impact", mbo.learner = NULL,
+  design.size = 15L, initial.subsample.range = c(0.5, 0.55), impact.encoding.boundary = 10L, mbo.learner = NULL,
   nthread = NULL, tune.threshold = TRUE) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
@@ -62,7 +62,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
   if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
-  assertChoice(factor.encoder, c("impact", "dummy"))
+  if (is.infinite(impact.encoding.boundary))
+    impact.encoding.boundary = .Machine$integer.max
+  assertIntegerish(impact.encoding.boundary, lower = 0, upper = Inf, len = 1L)
   assertIntegerish(nthread, lower = 1, null.ok = TRUE)
   assertFlag(tune.threshold)
 
@@ -103,11 +105,20 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     stop("Task must be regression or classification")
   }
 
+  # factor encoding
+  impact.cols = character(0L)
+  dummy.cols = character(0L)
+  
   if (has.cat.feats) {
-    if (factor.encoder == "impact") {
-      base.learner = makeImpactFeaturesWrapper(base.learner)
-    } else {
-      task = createDummyFeatures(task)
+    d = getTaskData(task, target.extra = TRUE)$data
+    feat.cols = colnames(d)[vlapply(d, is.factor)]
+    impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
+    dummy.cols = setdiff(feat.cols, impact.cols)
+    if (length(dummy.cols) > 0L)
+      base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
+    if (length(impact.cols) > 0L) {
+      base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
+      par.set = c(par.set, autoxgboost::impactencodingparset)
     }
   }
 
@@ -140,12 +151,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
-  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set)
-
-  if (has.cat.feats > 0 & factor.encoder == "impact") {
-    lrn = makeImpactFeaturesWrapper(lrn)
-  }
-
+  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set, 
+    dummy.cols = dummy.cols, impact.cols = impact.cols)
 
   mod = if(build.final.model) {
     train(lrn, task)

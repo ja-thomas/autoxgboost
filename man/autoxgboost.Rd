@@ -8,7 +8,7 @@ autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, initial.subsample.range = c(0.5, 0.55),
-  factor.encoder = "impact", mbo.learner = NULL, nthread = NULL,
+  impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL,
   tune.threshold = TRUE)
 }
 \arguments{
@@ -49,10 +49,10 @@ It is useful to restrict to fraction to be rather small to speed up the calcuati
 If \code{NULL} the full range defined in \code{par.set} is used.
 Default is \code{c(0.5, 0.55)}.}
 
-\item{factor.encoder}{[\code{numeric(1)}]\cr
-Defines how factor variables are handled. Either \code{"impact"} for impact encoding (see \code{\link{makeImpactFeaturesWrapper}}).
-Or \code{"dummy"} for Dummy encoding (see \code{\link[mlr]{createDummyFeatures}}).
-Default is \code{"impact"}.}
+\item{impact.encoding.boundary}{[\code{integer(1)}]\cr
+Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+(see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
+Default is \code{10L}.}
 
 \item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
 Regression learner from mlr, which is used as a surrogate to model our fitness function.
