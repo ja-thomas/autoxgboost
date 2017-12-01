@@ -5,7 +5,7 @@
 \title{Generate impact encoded numeric variables for factor features.}
 \usage{
 createImpactFeatures(obj, target = character(0L), cols = NULL, fun = NULL,
-  slope.param = 100L, trust.param = 100L)
+  slope.param = 100, trust.param = 100)
 }
 \arguments{
 \item{obj}{[\code{data.frame} | \code{\link{Task}}]\cr
@@ -32,7 +32,7 @@ Determines half of the minimal sample size for which we completely "trust" the c
 probability of a factor level. Default is \code{100L}}
 }
 \value{
-[\code{list}]: A list with four slots, see description for details.
+[\code{list}]: A list with three slots, see description for details.
 }
 \description{
 Replace all factor features with impact encoded versions following the method of Daniele Micci-Barreca (see \url{http://dl.acm.org/citation.cfm?id=507538}).
@@ -54,5 +54,5 @@ Missing factor levels are imputed by the mean of over all other replacements.
 Returned is a list with four slots: \code{data}, containing either a \code{data.frame}
 or a \code{task}, depending on the passed object. A list named \code{value.table} containing
 data.frames of the conditional probabilities or means aggregated by \code{fun}.
-Moreover, the values of \code{slope.param} and \code{trust.params} are returned.
+Moreover, the prior probabilities of the class levels  are returned in the \code{prior.table}.
 }

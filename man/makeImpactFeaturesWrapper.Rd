@@ -5,7 +5,7 @@
 \title{Fuse learner with impact feature creator.}
 \usage{
 makeImpactFeaturesWrapper(learner, cols = NULL, fun = NULL,
-  slope.param = 100L, trust.param = 100L)
+  slope.param = 100, trust.param = 100)
 }
 \arguments{
 \item{learner}{[\code{\link{Learner}} | \code{character(1)}]\cr

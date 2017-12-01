@@ -11,9 +11,9 @@ buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.s
   } else {
     makeLearner("regr.xgboost", nrounds = nrounds, objective = objective)
   }
-  if (length(dummy.cols) != 0L)
+  if (length(dummy.cols) > 0L)
     lrn = makeDummyFeaturesWrapper(lrn, cols = dummy.cols)
-  if (length(impact.cols) != 0L)
+  if (length(impact.cols) > 0L)
     lrn = makeImpactFeaturesWrapper(lrn, cols = impact.cols)
   lrn = setHyperPars2(lrn, par.vals = pars)
   return(lrn)

@@ -62,7 +62,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
   if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
     stop("Upper initial subsample range musst be greater (>) than lower ranger")
-  if (is.infinite(impact.encoding.boundary) == TRUE)
+  if (is.infinite(impact.encoding.boundary))
     impact.encoding.boundary = .Machine$integer.max
   assertIntegerish(impact.encoding.boundary, lower = 0, upper = Inf, len = 1L)
   assertIntegerish(nthread, lower = 1, null.ok = TRUE)
@@ -105,20 +105,21 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     stop("Task must be regression or classification")
   }
 
+  # factor encoding
+  impact.cols = character(0L)
+  dummy.cols = character(0L)
+  
   if (has.cat.feats) {
     d = getTaskData(task, target.extra = TRUE)$data
     feat.cols = colnames(d)[vlapply(d, is.factor)]
-    impact.cols = colnames(d[, vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)])
+    impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
     dummy.cols = setdiff(feat.cols, impact.cols)
-    if (length(dummy.cols) != 0L)
+    if (length(dummy.cols) > 0L)
       base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
-    if (length(impact.cols) != 0L) {
+    if (length(impact.cols) > 0L) {
       base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
       par.set = c(par.set, autoxgboost::impactencodingparset)
     }
-  } else {
-    impact.cols = character(0L)
-    dummy.cols = character(0L)
   }
 
 

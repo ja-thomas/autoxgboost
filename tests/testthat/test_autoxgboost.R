@@ -8,7 +8,7 @@ checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, c
 
     expect_class(r, "AutoxgbResult")
     if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
-      expect_class(r$final.learner, "PreprocWrapper") 
+      expect_class(r$final.learner, "PreprocWrapper") # could be dummyFeaturesWrapper or ImpactFeatures Wrapper. PreprocWrapper is the parent object class
     } else {
       expect_class(r$final.learner, "RLearner")
     }

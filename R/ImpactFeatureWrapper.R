@@ -15,13 +15,13 @@
 #' @inheritParams createImpactFeatures
 #' @return [\code{\link{Learner}}].
 #' @export
-makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
+makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.param = 100, trust.param = 100) {
   learner = mlr:::checkLearner(learner)
 
   args = list(cols = cols, fun = fun)
 
-  assertNumeric(slope.param, lower = 0, any.missing = FALSE)
-  assertNumeric(trust.param, lower = 0, any.missing = FALSE)
+  assertNumber(slope.param, lower = 0)
+  assertNumber(trust.param, lower = 0)
   args$slope.param = slope.param
   args$trust.param = trust.param
 
@@ -41,31 +41,11 @@ makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.par
 
   predictfun = function(data, target, args, control) {
 
-    value.table = control$value.table
-    prior.table = control$prior.table
-    work.cols = names(value.table)
-
-    for (wc in work.cols) {
-      tab = value.table[[wc]]
-      if (ncol(tab) == 2) {# regression or binary classif
-        data[, wc] = as.factor(data[, wc])
-        levels(data[, wc]) = tab[, 2] # set factor levels to conditional probabilities (classification) / conditional means (regression)
-        n = as.numeric(table(data[, wc])[as.character(data[, wc])]) # vector with absolute frequencies of each factor level
-        data[, wc] = impactEncodingLambda(n, args$slope.param, args$trust.param) * as.numeric(as.character(data[, wc])) + (1 - impactEncodingLambda(n, args$slope.param, args$trust.param)) * prior.table
-      } else { # multiclass classif
-        new.cols = paste(wc, colnames(tab[, -1]), sep = ".")
-        data[, new.cols] = data[, wc]
-        data[, wc] = NULL
-        for(i in seq_along(new.cols)) {
-          data[, new.cols[i]] = as.factor(data[, new.cols[i]])
-          levels(data[, new.cols[i]]) = tab[order(as.character(tab[, 1])), i + 1] # set factor levels to conditional probabilities
-          n = as.numeric(table(data[, new.cols[i]])[as.character(data[, new.cols[i]])]) # vector with absolute frequencies of each factor level
-          data[, new.cols[i]] = impactEncodingLambda(n, args$slope.param, args$trust.param) * as.numeric(as.character(data[, new.cols[i]])) + (1 - impactEncodingLambda(n, args$slope.param, args$trust.param)) * prior.table[i]
-        }
-      }
-    }
-
+    # replace values in the data
+    data = impactEncoding(data, names(control$value.table), control$value.table,
+      control$prior.table, args$slope.param, args$trust.param)
     return(data)
+    
   }
 
   lrn = makePreprocWrapper(learner, trainfun, predictfun, par.set = ps, par.vals = args)

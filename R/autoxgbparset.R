@@ -38,7 +38,7 @@ autoxgbparset = makeParamSet(
 #'  For a documentation of the parameter see \code{\link{createImpactFeatures}}.
 #'  By default this set is used:
 #'  \describe{
-#'    \item{slope.param}{Controls the rate of transition \eqn{\lambda}: Between \code{2^-10 = 0.00097...} and \code{2^12 = 4096}.}
+#'    \item{slope.param}{Controls the rate of transition \eqn{\lambda}: Between \code{2^-10 = 0.00097...} and \code{4096}.}
 #'    \item{trust.param}{Determines half of the minimal sample size for which we completely "trust" the conditional 
 #'   probability of a factor level: Between \code{0} and \code{4096}.}
 #'    }
@@ -48,6 +48,6 @@ autoxgbparset = makeParamSet(
 NULL
 
 impactencodingparset = makeParamSet(
-  makeNumericParam("slope.param", lower = -10, upper = 12, trafo = function(x) 2^x),
+  makeNumericParam("slope.param", lower = 2^-10, upper = 2^12),
   makeNumericParam("trust.param", lower = 0L, upper = 2^12)
 )

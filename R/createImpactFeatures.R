@@ -20,7 +20,7 @@
 #' Returned is a list with four slots: \code{data}, containing either a \code{data.frame}
 #' or a \code{task}, depending on the passed object. A list named \code{value.table} containing
 #' data.frames of the conditional probabilities or means aggregated by \code{fun}.
-#' Moreover, the values of \code{slope.param} and \code{trust.params} are returned.
+#' Moreover, the prior probabilities of the class levels  are returned in the \code{prior.table}.
 #' @param obj [\code{data.frame} | \code{\link{Task}}]\cr
 #'   Input data.
 #' @param target [\code{character(1)}]\cr
@@ -38,40 +38,37 @@
 #' @param trust.param [\code{integer}]\cr
 #'   Determines half of the minimal sample size for which we completely "trust" the conditional 
 #'   probability of a factor level. Default is \code{100L}
-#' @return [\code{list}]: A list with four slots, see description for details.
+#' @return [\code{list}]: A list with three slots, see description for details.
 #' @export
-createImpactFeatures = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
+createImpactFeatures = function(obj, target = character(0L), cols = NULL,
+  fun = NULL, slope.param = 100, trust.param = 100) {
   mlr:::checkTargetPreproc(obj, target, cols)
   assertFunction(fun, null.ok = TRUE)
-  assertNumeric(slope.param, lower = 0, any.missing = FALSE)
-  assertNumeric(trust.param, lower = 0, any.missing = FALSE)
+  assertNumber(slope.param, lower = 0)
+  assertNumber(trust.param, lower = 0)
   UseMethod("createImpactFeatures")
 }
 
 #' @export
-createImpactFeatures.data.frame = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
+createImpactFeatures.data.frame = function(obj, target = character(0L), 
+  cols = NULL, fun = NULL, slope.param = 100, trust.param = 100) {
   # get all factor feature names present in data
   work.cols = colnames(obj)[vlapply(obj, is.factor)]
   work.cols = setdiff(work.cols, target)
 
-  # aggregation function
-  if (is.null(fun)) {
-    if (is.numeric(obj[, target])) {
-      fun = mean # regression
-    } else if (length(unique(obj[, target])) > 2) {
-      fun = function(x) table(x) / length(x) # multiclass classification
-    } else { 
-      fun = function(x) table(x)[1] / length(x) # binary classification
-    }
-  }
-  
-  # prior table
-  if (is.numeric(obj[, target])) {
-    prior.table = mean(obj[, target]) # regression
-  } else if (length(unique(obj[, target])) > 2) {
-    prior.table = table(obj[, target]) / nrow(obj) # multiclass classification
-  } else { 
-    prior.table = (table(obj[, target]) / nrow(obj))[1] # binary classification
+  # aggregation function and prior table
+  if (is.numeric(obj[, target])) { # regression
+    prior.table = mean(obj[, target])
+    if (is.null(fun))
+      fun = mean 
+  } else if (length(unique(obj[, target])) > 2) {# multiclass classification
+    prior.table = table(obj[, target]) / nrow(obj)
+    if (is.null(fun))
+      fun = function(x) table(x) / length(x)
+  } else {  # binary classification
+    prior.table = classOneFraction(obj[, target])
+    if (is.null(fun))
+      fun = function(x) table(x)[1] / length(x)
   }
 
   # check that user requested cols are only factor cols
@@ -99,27 +96,7 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
   
 
   # replace values in the data
-  for (wc in work.cols) {
-    tab = value.table[[wc]]
-    if (ncol(tab) == 2) {# regression or binary classif
-      obj[, wc] = as.factor(obj[, wc])
-      levels(obj[, wc]) = tab[, 2] # set factor levels to conditional probabilities (classification) / conditional means (regression)
-      n = as.numeric(table(obj[, wc])[as.character(obj[, wc])]) # vector with absolute frequencies of each factor level
-      obj[, wc] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(obj[, wc])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table
-    } else {# multiclass classif
-      new.cols = paste(wc, colnames(tab[, -1]), sep = ".")
-      obj[, new.cols] = obj[, wc]
-      obj[, wc] = NULL
-      for (i in seq_along(new.cols)) {
-        obj[, new.cols[i]] = as.factor(obj[, new.cols[i]])
-        levels(obj[, new.cols[i]]) = tab[order(as.character(tab[, 1])), i + 1] # set factor levels to conditional probabilities
-        n = as.numeric(table(obj[, new.cols[i]])[as.character(obj[, new.cols[i]])]) # vector with absolute frequencies of each factor level
-        obj[, new.cols[i]] = impactEncodingLambda(n, slope.param, trust.param) * as.numeric(as.character(obj[, new.cols[i]])) + (1 - impactEncodingLambda(n, slope.param, trust.param)) * prior.table[i]
-      }
-    }
-  }
-  
-
+  obj = impactEncoding(obj, work.cols, value.table, prior.table, slope.param, trust.param)
   
   return(list(
     data = obj,
@@ -128,7 +105,8 @@ createImpactFeatures.data.frame = function(obj, target = character(0L), cols = N
 }
 
 #' @export
-createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL, fun = NULL, slope.param = 100L, trust.param = 100L) {
+createImpactFeatures.Task = function(obj, target = character(0L), cols = NULL,
+  fun = NULL, slope.param = 100, trust.param = 100) {
   target = getTaskTargetNames(obj)
   tt = getTaskType(obj)
 
