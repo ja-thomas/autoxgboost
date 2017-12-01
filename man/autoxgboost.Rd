@@ -8,7 +8,7 @@ autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, factor.encoder = "impact", mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE)
+  nthread = NULL, tune.threshold = TRUE, validation.data = NULL)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr

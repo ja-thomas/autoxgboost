@@ -48,7 +48,7 @@
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, factor.encoder = "impact", mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE) {
+  nthread = NULL, tune.threshold = TRUE, validation.data = NULL) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
