@@ -30,11 +30,6 @@
 #'   Default is \code{4/5}.
 #' @param design.size [\code{integer(1)}]\cr
 #'   Size of the initial design. Default is \code{15L}.
-#' @param initial.subsample.range [\code{numeric(2)} | \code{NULL}]\cr
-#'   From what range should the subsampling parameter in the initial design be sampled?
-#'   It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
-#'   If \code{NULL} the full range defined in \code{par.set} is used.
-#'   Default is \code{c(0.5, 0.55)}.
 #' @param impact.encoding.boundary [\code{integer(1)}]\cr
 #'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
 #'   (see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
@@ -52,16 +47,13 @@
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55), impact.encoding.boundary = 10L, mbo.learner = NULL,
+  design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
   nthread = NULL, tune.threshold = TRUE) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
   assertFlag(build.final.model)
   assertIntegerish(design.size, lower = 1, null.ok = FALSE)
-  assertNumeric(initial.subsample.range, lower = 0, upper = 1, len = 2, null.ok = TRUE)
-  if (!is.null(initial.subsample.range) & (initial.subsample.range[2] <= initial.subsample.range[1]))
-    stop("Upper initial subsample range musst be greater (>) than lower ranger")
   if (is.infinite(impact.encoding.boundary))
     impact.encoding.boundary = .Machine$integer.max
   assertIntegerish(impact.encoding.boundary, lower = 0, upper = Inf, len = 1L)
@@ -82,15 +74,18 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   if (!is.null(nthread))
     pv$nthread = nthread
 
+  rdesc = makeResampleDesc("Holdout", split = early.stopping.fraction)
+  early.stopping.data =  makeResampleInstance(rdesc, task)$test.inds[[1]]
+
   if (tt == "classif") {
 
-    predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold == TRUE, "prob", "response")
+    predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold, "prob", "response")
     objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
     eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
 
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
+      max.nrounds = max.nrounds, early.stopping.data = early.stopping.data, par.vals = pv)
 
   } else if (tt == "regr") {
     predict.type = NULL
@@ -99,7 +94,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
     base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.fraction = early.stopping.fraction, par.vals = pv)
+      max.nrounds = max.nrounds, early.stopping.data = early.stopping.data, par.vals = pv)
 
   } else {
     stop("Task must be regression or classification")
@@ -128,7 +123,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
       lrn = setHyperPars(base.learner, par.vals = x)
       mod = train(lrn, task)
-      test = subsetTask(task, subset = mod$learner.model$test.inds)
+      test = subsetTask(task, subset = early.stopping.data)
       pred = predict(mod, test)
       nrounds = getBestIteration(mod)
 
@@ -147,7 +142,6 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
 
   des = generateDesign(n = design.size, par.set)
-  des$subsample = runif(design.size, initial.subsample.range[1], initial.subsample.range[2])
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 

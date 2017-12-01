@@ -7,9 +7,8 @@
 autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55),
-  impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL,
-  tune.threshold = TRUE)
+  design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
+  nthread = NULL, tune.threshold = TRUE)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -42,12 +41,6 @@ Default is \code{FALSE}.}
 
 \item{design.size}{[\code{integer(1)}]\cr
 Size of the initial design. Default is \code{15L}.}
-
-\item{initial.subsample.range}{[\code{numeric(2)} | \code{NULL}]\cr
-From what range should the subsampling parameter in the initial design be sampled?
-It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
-If \code{NULL} the full range defined in \code{par.set} is used.
-Default is \code{c(0.5, 0.55)}.}
 
 \item{impact.encoding.boundary}{[\code{integer(1)}]\cr
 Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
