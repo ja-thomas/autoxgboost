@@ -10,7 +10,7 @@ This is the default parameter set for xgboost that is used for tuning if no cost
  \describe{
    \item{eta}{Learning rate: Between \code{0.01} and \code{0.2}.}
    \item{gamma}{Minimum loss required for a split: Between \code{2^-7 = 0.0078125} and \code{2^6 = 64}.}
-   \item{max_depth}{Maximum tree depth: Between \code{3} and \code{12}.}
+   \item{max_depth}{Maximum tree depth: Between \code{3} and \code{20}.}
    \item{colsample_bytree}{Subsample ratio of columns per tree: Between \code{0.5} and \code{1}.}
    \item{colsample_bylevel}{Subsample ratio of clumns per tree level: Between \code{0.5} and \code{1}.}
    \item{lambda}{L2 Regularization: Between \code{2^-10 = 0.00097...} and \code{2^10 = 1024}.}
