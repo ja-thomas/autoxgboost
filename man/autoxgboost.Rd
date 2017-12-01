@@ -7,9 +7,8 @@
 autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, initial.subsample.range = c(0.5, 0.55),
-  factor.encoder = "impact", mbo.learner = NULL, nthread = NULL,
-  tune.threshold = TRUE)
+  design.size = 15L, factor.encoder = "impact", mbo.learner = NULL,
+  nthread = NULL, tune.threshold = TRUE)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -42,12 +41,6 @@ Default is \code{FALSE}.}
 
 \item{design.size}{[\code{integer(1)}]\cr
 Size of the initial design. Default is \code{15L}.}
-
-\item{initial.subsample.range}{[\code{numeric(2)} | \code{NULL}]\cr
-From what range should the subsampling parameter in the initial design be sampled?
-It is useful to restrict to fraction to be rather small to speed up the calcuation of the initial design.
-If \code{NULL} the full range defined in \code{par.set} is used.
-Default is \code{c(0.5, 0.55)}.}
 
 \item{factor.encoder}{[\code{numeric(1)}]\cr
 Defines how factor variables are handled. Either \code{"impact"} for impact encoding (see \code{\link{makeImpactFeaturesWrapper}}).
