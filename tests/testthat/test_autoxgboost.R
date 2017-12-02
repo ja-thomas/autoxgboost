@@ -66,13 +66,13 @@ context("Weights")
 test_that("weights work", {
   iris.weighted = makeClassifTask(data = iris, target = "Species", weights = sample(c(1,20), 150, replace = TRUE))
   bh.weighted = makeRegrTask(data = getTaskData(bh.task)[1:50, -4], target = "medv", weights = sample(c(1,20), 50, replace = TRUE))
-  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
-  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
 })
 
 context("Printer")
 test_that("autoxgboost printer works", {
-  mod = autoxgboost(iris.task, control = ctrl, tune.threshold = FALSE)
+  mod = autoxgboost(iris.task, control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
   expect_output(print(mod), "Autoxgboost tuning result")
   expect_output(print(mod), "Recommended parameters:")
   expect_output(print(mod), "eta:")
