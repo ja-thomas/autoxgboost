@@ -11,7 +11,6 @@ makeRLearner.regr.autoxgboost = function() {
       makeIntegerLearnerParam(id = "early.stopping.rounds", lower = 1, default = 10L),
       makeNumericLearnerParam(id = "early.stopping.fraction", lower = 0, upper = 1, default = 4/5),
       makeIntegerLearnerParam(id = "design.size", lower = 1L, default = 15L),
-      makeNumericVectorLearnerParam(id = "initial.subsample.range", len = 2, lower = c(0,0), upper = c(1,1), default = c(0.5, 0.55)),
       makeDiscreteLearnerParam(id  = "factor.encode", values = c("impact", "dummy"), default = "impact"),
       makeUntypedLearnerParam(id = "mbo.learner"),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE),
@@ -28,12 +27,12 @@ makeRLearner.regr.autoxgboost = function() {
 trainLearner.regr.autoxgboost = function(.learner, .task, .subset, .weights = NULL,
   measure = mse, control = NULL, par.set = autoxgbparset, max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE, design.size = 15L,
-  initial.subsample.range = c(0.5, 0.55), factor.encode = "impact", mbo.learner = NULL, nthread = NULL, tune.threshold = TRUE, ...) {
+  impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL, tune.threshold = TRUE, ...) {
 
   .task = subsetTask(.task, .subset)
   autoxgboost(.task, measure, control, par.set, max.nrounds, early.stopping.rounds,
-    early.stopping.fraction, build.final.model, design.size, initial.subsample.range,
-    factor.encode, mbo.learner, nthread, tune.threshold)
+    early.stopping.fraction, build.final.model, design.size,
+    impact.encoding.boundary, mbo.learner, nthread, tune.threshold)
 
 }
 
