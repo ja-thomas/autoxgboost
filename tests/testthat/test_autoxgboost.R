@@ -13,14 +13,16 @@ checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, c
       expect_class(r$final.learner, "RLearner")
     }
     expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
-    expect_class(r$final.model, "WrappedModel")
 
     extras = names(r$optim.result$opt.path$env$extra[[11]])
     expect_subset("nrounds", extras) # check that nrounds is in extras
     expect_equal(16, nrow(as.data.frame(r$optim.result$opt.path))) # check that opt.path has right number of rows
 
-    p = predict(r, newdata = getTaskData(task))
-    expect_class(p, "Prediction")
+    if (build.final.model) {
+      expect_class(r$final.model, "WrappedModel")
+      p = predict(r, newdata = getTaskData(task))
+      expect_class(p, "Prediction")
+    }
 
   }
 
@@ -64,6 +66,24 @@ context("Weights")
 test_that("weights work", {
   iris.weighted = makeClassifTask(data = iris, target = "Species", weights = sample(c(1,20), 150, replace = TRUE))
   bh.weighted = makeRegrTask(data = getTaskData(bh.task)[1:50, -4], target = "medv", weights = sample(c(1,20), 50, replace = TRUE))
-  checkAutoxgboost(task = iris.weighted, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, tune.threshold = FALSE)
-  checkAutoxgboost(task = bh.weighted, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+})
+
+context("Printer")
+test_that("autoxgboost printer works", {
+  mod = autoxgboost(iris.task, control = ctrl, tune.threshold = FALSE)
+  expect_output(print(mod), "Autoxgboost tuning result")
+  expect_output(print(mod), "Recommended parameters:")
+  expect_output(print(mod), "eta:")
+  expect_output(print(mod), "gamma:")
+  expect_output(print(mod), "max_depth:")
+  expect_output(print(mod), "colsample_bytree:")
+  expect_output(print(mod), "colsample_bylevel:")
+  expect_output(print(mod), "lambda:")
+  expect_output(print(mod), "alpha:")
+  expect_output(print(mod), "subsample:")
+  expect_output(print(mod), "nrounds:")
+  expect_output(print(mod), "With tuning result: mmce = ")
+
 })
