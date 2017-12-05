@@ -15,5 +15,13 @@ r_packages:
   - parallelMap
   - rpart
   - cmaes
+  - rgenoud
+  - checkmate
+
+r_github_packages:
+  - jimhester/covr
 
 warnings_are_errors: true
+
+after_success:
+  - Rscript -e 'covr::coveralls()'

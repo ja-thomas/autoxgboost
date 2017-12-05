@@ -1,28 +1,32 @@
 context("autoxgboost")
 
-checkAutoxgboost = function(task, build.final.model, factor.encoder, control, mbo.learner, tune.threshold) {
+checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, control, mbo.learner, tune.threshold) {
     r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L,
-      factor.encoder = factor.encoder, control = control, mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
+      impact.encoding.boundary = impact.encoding.boundary, control = control,
+      mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
     td = getTaskDesc(task)
 
     expect_class(r, "AutoxgbResult")
-    if (sum(td$n.feat[c("factors", "ordered")]) > 0 & factor.encoder == "impact") {
-      expect_class(r$final.learner, "ImpactFeatureWrapper")
+    if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
+      expect_class(r$final.learner, "PreprocWrapper") # could be dummyFeaturesWrapper or ImpactFeatures Wrapper. PreprocWrapper is the parent object class
     } else {
       expect_class(r$final.learner, "RLearner")
     }
     expect_class(r$optim.result, c("MBOSingleObjResult", "MBOResult"))
-    expect_class(r$final.model, "WrappedModel")
 
     extras = names(r$optim.result$opt.path$env$extra[[11]])
     expect_subset("nrounds", extras) # check that nrounds is in extras
     expect_equal(16, nrow(as.data.frame(r$optim.result$opt.path))) # check that opt.path has right number of rows
 
-    p = predict(r, newdata = getTaskData(task))
-    expect_class(p, "Prediction")
+    if (build.final.model) {
+      expect_class(r$final.model, "WrappedModel")
+      p = predict(r, newdata = getTaskData(task))
+      expect_class(p, "Prediction")
+    }
 
   }
 
+context("Different Tasks")
 test_that("autoxgboost works on different tasks",  {
 
   iris.fac = droplevels(iris[1:100,])
@@ -41,15 +45,45 @@ test_that("autoxgboost works on different tasks",  {
     iris.fac
   )
 
-  for (im in c("impact", "dummy")) {
+  for (im in c(0L, Inf)) {
     for (t in tasks) {
-      checkAutoxgboost(task = t, build.final.model = TRUE, factor.encoder = im, control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+      checkAutoxgboost(task = t, build.final.model = TRUE, impact.encoding.boundary = im,
+        control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
     }
   }
 
 })
 
+context("Thresholds")
 test_that("autoxgboost thresholding works",  {
-  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
-  checkAutoxgboost(task = iris.task, build.final.model = TRUE, factor.encoder = "impact", control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, impact.encoding.boundary = Inf,
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = Inf,
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+})
+
+context("Weights")
+test_that("weights work", {
+  iris.weighted = makeClassifTask(data = iris, target = "Species", weights = sample(c(1,20), 150, replace = TRUE))
+  bh.weighted = makeRegrTask(data = getTaskData(bh.task)[1:50, -4], target = "medv", weights = sample(c(1,20), 50, replace = TRUE))
+  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+})
+
+context("Printer")
+test_that("autoxgboost printer works", {
+  mod = autoxgboost(iris.task, control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+  expect_output(print(mod), "Autoxgboost tuning result")
+  expect_output(print(mod), "Recommended parameters:")
+  expect_output(print(mod), "eta:")
+  expect_output(print(mod), "gamma:")
+  expect_output(print(mod), "max_depth:")
+  expect_output(print(mod), "colsample_bytree:")
+  expect_output(print(mod), "colsample_bylevel:")
+  expect_output(print(mod), "lambda:")
+  expect_output(print(mod), "alpha:")
+  expect_output(print(mod), "subsample:")
+  expect_output(print(mod), "nrounds:")
+  expect_output(print(mod), "With tuning result: mmce = ")
+
 })

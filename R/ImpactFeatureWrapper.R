@@ -7,45 +7,48 @@
 #' @param learner [\code{\link{Learner}} | \code{character(1)}]\cr
 #'   The learner.
 #'   If you pass a string the learner will be created via \code{\link{makeLearner}}.
+#' @param slope.param [\code{numeric}]\cr
+#'   Controls the rate of transition \eqn{\lambda} (see \code{\link{createImpactFeatures}}). Default is \code{100L}.
+#' @param trust.param [\code{numeric}]\cr
+#'   Determines half of the minimal sample size for which we completely "trust" the conditional 
+#'   probability of a factor level (see \code{\link{createImpactFeatures}}). Default is \code{100L}
 #' @inheritParams createImpactFeatures
 #' @return [\code{\link{Learner}}].
 #' @export
-makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL) {
+makeImpactFeaturesWrapper = function(learner, cols = NULL, fun = NULL, slope.param = 100, trust.param = 100) {
   learner = mlr:::checkLearner(learner)
-  args = list(cols = cols, fun = fun)
-  rm(list = names(args))
 
+  args = list(cols = cols, fun = fun)
+
+  assertNumber(slope.param, lower = 0)
+  assertNumber(trust.param, lower = 0)
+  args$slope.param = slope.param
+  args$trust.param = trust.param
+
+  rm(list = names(args))
+  
+  ps = makeParamSet(
+    makeNumericParam(id = "slope.param", lower = 0, upper = Inf),
+    makeNumericParam(id = "trust.param", lower = 0, upper = Inf)
+  )
+  
   trainfun = function(data, target, args) {
-    data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun)
-    return(list(data = data$data, control = list(value.table = data$value.table)))
+    data = createImpactFeatures(data, target, cols = args$cols, fun = args$fun,
+      slope.param = args$slope.param, trust.param = args$trust.param)
+    return(list(data = data$data, control = list(value.table = data$value.table,
+      prior.table = data$prior.table)))
   }
 
   predictfun = function(data, target, args, control) {
 
-    value.table = control$value.table
-    work.cols = names(value.table)
-
-    for (wc in work.cols) {
-      tab = value.table[[wc]]
-      if (ncol(tab) == 2) {
-        levels(data[,wc]) = tab[,2]
-        data[,wc] = as.numeric(as.character(data[,wc]))
-      } else { # for multiclass classif
-        new.cols = paste(wc, colnames(tab)[-1], sep = ".")
-        data[, new.cols] = data[, wc]
-        data[, wc] = NULL
-        for(i in seq_along(new.cols)) {
-          data[, new.cols[i]] = as.factor(data[, new.cols[i]])
-          levels(data[, new.cols[i]]) = tab[, i + 1]
-          data[,new.cols[i]] = as.numeric(as.character(data[, new.cols[i]]))
-        }
-      }
-    }
-
+    # replace values in the data
+    data = impactEncoding(data, names(control$value.table), control$value.table,
+      control$prior.table, args$slope.param, args$trust.param)
     return(data)
+    
   }
 
-  lrn = makePreprocWrapper(learner, trainfun, predictfun, par.vals = args)
+  lrn = makePreprocWrapper(learner, trainfun, predictfun, par.set = ps, par.vals = args)
   lrn$id = stringi::stri_replace(lrn$id, replacement = ".impact", regex = "\\.preproc$")
   addClasses(lrn, "ImpactFeatureWrapper")
 
