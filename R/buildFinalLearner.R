@@ -6,10 +6,10 @@ buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.s
   pars = trafoValue(par.set, optim.result$x)
 
   lrn = if (!is.null(predict.type)) {
-    makeLearner("classif.xgboost", nrounds = nrounds, objective = objective,
+    makeLearner("classif.xgboost.custom", nrounds = nrounds, objective = objective,
       predict.type = predict.type, predict.threshold = getThreshold(optim.result))
   } else {
-    makeLearner("regr.xgboost", nrounds = nrounds, objective = objective)
+    makeLearner("regr.xgboost.custom", nrounds = nrounds, objective = objective)
   }
   if (length(dummy.cols) > 0L)
     lrn = makeDummyFeaturesWrapper(lrn, cols = dummy.cols)

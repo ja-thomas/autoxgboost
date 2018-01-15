@@ -21,6 +21,7 @@ makeRLearner.classif.xgboost.earlystop = function() {
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
       makeIntegerVectorLearnerParam(id = "early.stopping.data", lower = 0),
+      makeNumericLearnerParam(id = "scale_pos_weight", lower = 0),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
     ),
     properties = c("twoclass", "multiclass", "numerics", "prob", "weights", "missings"),
@@ -32,7 +33,7 @@ makeRLearner.classif.xgboost.earlystop = function() {
 
 #' @export
 trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .weights = NULL,
-  objective = NULL, eval_metric = NULL, early_stopping_rounds = 1, max.nrounds = 10^6, early.stopping.data, nthread, ...) {
+  objective = NULL, eval_metric = NULL, early_stopping_rounds = 1, max.nrounds = 10^6, early.stopping.data, scale_pos_weight, nthread, ...) {
 
   td = getTaskDesc(.task)
   nc = length(td$class.levels)
