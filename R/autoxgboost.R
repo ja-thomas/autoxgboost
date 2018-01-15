@@ -80,8 +80,14 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   if (tt == "classif") {
 
     predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold, "prob", "response")
-    objective = ifelse(length(td$class.levels) == 2, "binary:logistic", "multi:softprob")
-    eval_metric = ifelse(length(td$class.levels) == 2, "error", "merror")
+    if(length(td$class.levels) == 2) {
+      objective = "binary:logistic"
+      eval_metric = "error"
+      par.set = c(par.set, makeParamSet(makeNumericParam("scale_pos_weight", lower = -10, upper = 10, trafo = function(x) 2^x)))
+    } else {
+      objective = "multi:softprob"
+      eval_metric = "merror"
+    }
 
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
@@ -103,7 +109,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   # factor encoding
   impact.cols = character(0L)
   dummy.cols = character(0L)
-  
+
   if (has.cat.feats) {
     d = getTaskData(task, target.extra = TRUE)$data
     feat.cols = colnames(d)[vlapply(d, is.factor)]
@@ -145,7 +151,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
-  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set, 
+  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set,
     dummy.cols = dummy.cols, impact.cols = impact.cols)
 
   mod = if(build.final.model) {
