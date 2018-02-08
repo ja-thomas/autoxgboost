@@ -45,6 +45,14 @@
 #'   Default is \code{TRUE}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
+#' @examples
+#' \donttest{
+#' iris.task = makeClassifTask(data = iris, target = "Species")
+#' ctrl = makeMBOControl()
+#' ctrl = setMBOControlTermination(ctrl, iters = 1L) #Speed up Tuning by only doing 1 iteration
+#' res = autoxgboost(iris.task, control = ctrl, tune.threshold = FALSE)
+#' res
+#' }
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
   design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
