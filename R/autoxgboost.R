@@ -47,7 +47,7 @@
 #' @export
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
+  design.size = 15L, impact.encoding.boundary = 3L, mbo.learner = NULL,
   nthread = NULL, tune.threshold = TRUE) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)

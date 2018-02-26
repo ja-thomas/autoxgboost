@@ -48,6 +48,6 @@ autoxgbparset = makeParamSet(
 NULL
 
 impactencodingparset = makeParamSet(
-  makeNumericParam("slope.param", lower = 2^-10, upper = 2^12),
-  makeNumericParam("trust.param", lower = 0L, upper = 2^12)
+  makeNumericParam("slope.param", lower = -10, upper = 12, trafo = function(x) 2^x),
+  makeNumericParam("trust.param", lower = -10, upper = 12, trafo = function(x) 2^x)
 )
