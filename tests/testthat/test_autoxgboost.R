@@ -1,8 +1,7 @@
 context("autoxgboost")
 
-checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, control, mbo.learner, tune.threshold) {
-    r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L,
-      impact.encoding.boundary = impact.encoding.boundary, control = control,
+checkAutoxgboost = function(task, build.final.model, control, mbo.learner, tune.threshold) {
+    r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L, control = control,
       mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
     td = getTaskDesc(task)
 
@@ -45,20 +44,18 @@ test_that("autoxgboost works on different tasks",  {
     iris.fac
   )
 
-  for (im in c(0L, Inf)) {
-    for (t in tasks) {
-      checkAutoxgboost(task = t, build.final.model = TRUE, impact.encoding.boundary = im,
-        control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
-    }
+  for (t in tasks) {
+    checkAutoxgboost(task = t, build.final.model = TRUE, control = ctrl,
+      mbo.learner = mbo.learner, tune.threshold = FALSE)
   }
-
+  
 })
 
 context("Thresholds")
 test_that("autoxgboost thresholding works",  {
-  checkAutoxgboost(task = sonar.task, build.final.model = TRUE, impact.encoding.boundary = Inf,
+  checkAutoxgboost(task = sonar.task, build.final.model = TRUE,
     control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
-  checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = Inf,
+  checkAutoxgboost(task = iris.task, build.final.model = TRUE,
     control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
 })
 
@@ -66,8 +63,8 @@ context("Weights")
 test_that("weights work", {
   iris.weighted = makeClassifTask(data = iris, target = "Species", weights = sample(c(1,20), 150, replace = TRUE))
   bh.weighted = makeRegrTask(data = getTaskData(bh.task)[1:50, -4], target = "medv", weights = sample(c(1,20), 50, replace = TRUE))
-  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
-  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = Inf, control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, control = ctrl, tune.threshold = FALSE)
+  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, control = ctrl, tune.threshold = FALSE)
 })
 
 context("Printer")

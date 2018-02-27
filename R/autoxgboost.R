@@ -30,10 +30,6 @@
 #'   Default is \code{4/5}.
 #' @param design.size [\code{integer(1)}]\cr
 #'   Size of the initial design. Default is \code{15L}.
-#' @param impact.encoding.boundary [\code{integer(1)}]\cr
-#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-#'   (see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
-#'   Default is \code{10L}.
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
 #'   If \code{NULL} (default), the default learner is determined as described here: \link[mlrMBO]{mbo_default_learner}.
@@ -55,16 +51,12 @@
 #' }
 autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, impact.encoding.boundary = 3L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE) {
+  design.size = 15L, mbo.learner = NULL, nthread = NULL, tune.threshold = TRUE) {
 
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
   assertFlag(build.final.model)
   assertIntegerish(design.size, lower = 1, null.ok = FALSE)
-  if (is.infinite(impact.encoding.boundary))
-    impact.encoding.boundary = .Machine$integer.max
-  assertIntegerish(impact.encoding.boundary, lower = 0, upper = Inf, len = 1L)
   assertIntegerish(nthread, lower = 1, null.ok = TRUE)
   assertFlag(tune.threshold)
 
@@ -119,16 +111,12 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   dummy.cols = character(0L)
 
   if (has.cat.feats) {
+    factor.encoding = TRUE
     d = getTaskData(task, target.extra = TRUE)$data
     feat.cols = colnames(d)[vlapply(d, is.factor)]
-    impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
-    dummy.cols = setdiff(feat.cols, impact.cols)
-    if (length(dummy.cols) > 0L)
-      base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
-    if (length(impact.cols) > 0L) {
-      base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
-      par.set = c(par.set, autoxgboost::impactencodingparset)
-    }
+    base.learner = makeIntegerFeaturesWrapper(base.learner)
+  } else {
+    factor.encoding = FALSE
   }
 
 
@@ -159,8 +147,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
-  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set,
-    dummy.cols = dummy.cols, impact.cols = impact.cols)
+  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set, factor.encoding = factor.encoding)
 
   mod = if(build.final.model) {
     train(lrn, task)

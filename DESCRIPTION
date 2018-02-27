@@ -5,7 +5,7 @@ Authors@R: person("Janek", "Thomas", email = "janek.tho@gmail.com", role = c("au
 Description: Automatic tuning and fitting of 'xgboost'. Use early stopping
     to determine the optimal number of iterations and Bayesian optimization (from
     'mlrMBO') for all further parameters. Tunes class weights and thresholds in classification.
-    Categorical features are handled efficiently either by impact encoding or dummy encoding based on the number of factor levels.
+    Categorical features are handled efficiently by feature hashing.
 License: BSD_2_clause + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -25,5 +25,6 @@ Suggests:
     testthat,
     rpart,
     cmaes,
-    rgenoud
+    rgenoud,
+    GenSA
 RoxygenNote: 6.0.1

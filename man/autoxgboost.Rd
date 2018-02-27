@@ -7,8 +7,8 @@
 autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
   max.nrounds = 10^6, early.stopping.rounds = 10L,
   early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE)
+  design.size = 15L, mbo.learner = NULL, nthread = NULL,
+  tune.threshold = TRUE)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -41,11 +41,6 @@ Default is \code{FALSE}.}
 
 \item{design.size}{[\code{integer(1)}]\cr
 Size of the initial design. Default is \code{15L}.}
-
-\item{impact.encoding.boundary}{[\code{integer(1)}]\cr
-Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-(see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
-Default is \code{10L}.}
 
 \item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
 Regression learner from mlr, which is used as a surrogate to model our fitness function.
