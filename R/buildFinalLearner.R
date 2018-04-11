@@ -15,5 +15,9 @@ buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.s
 
   lrn = preproc.pipeline %>>% lrn
 
+
+  #FIXME mlrCPO #39
+  lrn$properties = c(lrn$properties, "weights")
+
   return(lrn)
 }

@@ -113,28 +113,29 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   } else {
     stop("Task must be regression or classification")
   }
-
   preproc.pipeline = NULLCPO
 
   if (has.cat.feats) {
+    preproc.pipeline %<>>% cpoFixFactors()
     d = getTaskData(task, target.extra = TRUE)$data
     feat.cols = colnames(d)[vlapply(d, is.factor)]
     impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
     dummy.cols = setdiff(feat.cols, impact.cols)
     if (length(dummy.cols) > 0L)
-      preproc.pipeline = cpoDummyEncode(affect.names = dummy.cols) %>>% preproc.pipeline
+        preproc.pipeline %<>>% cpoDummyEncode(affect.names = dummy.cols)
     if (length(impact.cols) > 0L) {
       if (tt == "classif") {
-        preproc.pipeline = cpoImpactEncodeClassif(affect.names = impact.cols) %>>% preproc.pipeline
+        preproc.pipeline %<>>% cpoImpactEncodeClassif(affect.names = impact.cols)
       } else {
-        preproc.pipeline = cpoImpactEncodeRegr(affect.names = impact.cols) %>>% preproc.pipeline
+        preproc.pipeline %<>>% cpoImpactEncodeRegr(affect.names = impact.cols)
       }
     }
-    preproc.pipeline = cpoFixFactors() %>>% preproc.pipeline
   }
 
-  base.learner = preproc.pipeline %>>% base.learner
+  base.learner %<<<% preproc.pipeline %>>% cpoDropConstants()
 
+  #FIXME mlrCPO #39
+  base.learner$properties = c(base.learner$properties, "weights")
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {

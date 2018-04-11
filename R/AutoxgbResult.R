@@ -32,9 +32,6 @@ print.AutoxgbResult = function(x, ...) {
 
 
   catf("\n\nPreprocessing pipeline:")
-    if (inherits(x$preproc.pipeline, "NULLCPO"))
-      catf("None")
-    else
       print(x$preproc.pipeline)
 
   catf("\nWith tuning result: %s = %.3f", x$measure$id, x$optim.result$y)
