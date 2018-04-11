@@ -31,8 +31,8 @@
 #' @param design.size [\code{integer(1)}]\cr
 #'   Size of the initial design. Default is \code{15L}.
 #' @param impact.encoding.boundary [\code{integer(1)}]\cr
-#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-#'   (see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
+#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+#'   For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
 #'   Default is \code{10L}.
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
@@ -114,9 +114,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     stop("Task must be regression or classification")
   }
 
-  # factor encoding
-  impact.cols = character(0L)
-  dummy.cols = character(0L)
+  preproc.pipeline = NULLCPO
 
   if (has.cat.feats) {
     d = getTaskData(task, target.extra = TRUE)$data
@@ -124,12 +122,18 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
     dummy.cols = setdiff(feat.cols, impact.cols)
     if (length(dummy.cols) > 0L)
-      base.learner = makeDummyFeaturesWrapper(base.learner, cols = dummy.cols)
+      preproc.pipeline = cpoDummyEncode(affect.names = dummy.cols) %>>% preproc.pipeline
     if (length(impact.cols) > 0L) {
-      base.learner = makeImpactFeaturesWrapper(base.learner, cols = impact.cols)
-      par.set = c(par.set, autoxgboost::impactencodingparset)
+      if (tt == "classif") {
+        preproc.pipeline = cpoImpactEncodeClassif(affect.names = impact.cols) %>>% preproc.pipeline
+      } else {
+        preproc.pipeline = cpoImpactEncodeRegr(affect.names = impact.cols) %>>% preproc.pipeline
+      }
     }
+    preproc.pipeline = cpoFixFactors() %>>% preproc.pipeline
   }
+
+  base.learner = preproc.pipeline %>>% base.learner
 
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
@@ -158,9 +162,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
   des = generateDesign(n = design.size, par.set)
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
-
   lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set,
-    dummy.cols = dummy.cols, impact.cols = impact.cols)
+    dummy.cols = dummy.cols, impact.cols = impact.cols, preproc.pipeline = preproc.pipeline)
 
   mod = if(build.final.model) {
     train(lrn, task)
@@ -172,6 +175,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, par.set = NULL, max
     optim.result = optim.result,
     final.learner = lrn,
     final.model = mod,
-    measure = measure)
+    measure = measure,
+    preproc.pipeline = preproc.pipeline
+  )
 
 }

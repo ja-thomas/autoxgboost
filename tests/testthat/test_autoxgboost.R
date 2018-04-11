@@ -1,5 +1,3 @@
-context("autoxgboost")
-
 checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, control, mbo.learner, tune.threshold) {
     r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L,
       impact.encoding.boundary = impact.encoding.boundary, control = control,
@@ -8,7 +6,7 @@ checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, c
 
     expect_class(r, "AutoxgbResult")
     if (sum(td$n.feat[c("factors", "ordered")]) > 0) {
-      expect_class(r$final.learner, "PreprocWrapper") # could be dummyFeaturesWrapper or ImpactFeatures Wrapper. PreprocWrapper is the parent object class
+      expect_class(r$final.learner, "CPOLearner")
     } else {
       expect_class(r$final.learner, "RLearner")
     }
