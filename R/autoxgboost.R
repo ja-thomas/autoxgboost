@@ -39,7 +39,7 @@
 #'   Size of the initial design. Default is \code{15L}.
 #' @param impact.encoding.boundary [\code{integer(1)}]\cr
 #'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-#'   For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
+#'   For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = .Machine$integer.max}, all of them get dummy encoded.
 #'   Default is \code{10}.
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
 #'   Regression learner from mlr, which is used as a surrogate to model our fitness function.
@@ -78,9 +78,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
   assertFlag(build.final.model)
   assertIntegerish(design.size, lower = 1L, len = 1L)
-  if (is.infinite(impact.encoding.boundary))
-    impact.encoding.boundary = .Machine$integer.max
-  assertIntegerish(impact.encoding.boundary, lower = 0, upper = Inf, len = 1L)
+  assertIntegerish(impact.encoding.boundary, lower = 0, len = 1L)
   assertIntegerish(nthread, lower = 1, len = 1L, null.ok = TRUE)
   assertFlag(tune.threshold)
 
@@ -100,8 +98,10 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   if (!is.null(nthread))
     pv$nthread = nthread
 
-  rdesc = makeResampleDesc("Holdout", split = early.stopping.fraction)
-  early.stopping.data =  makeResampleInstance(rdesc, task)$test.inds[[1]]
+  rinst = makeResampleInstance(makeResampleDesc("Holdout", split = early.stopping.fraction), task)
+
+  task.test = subsetTask(task, rinst$test.inds[[1]])
+  task = subsetTask(task, rinst$train.inds[[1]])
 
   if (tt == "classif") {
 
@@ -117,7 +117,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.data = early.stopping.data, par.vals = pv)
+      max.nrounds = max.nrounds, par.vals = pv)
 
   } else if (tt == "regr") {
     predict.type = NULL
@@ -126,7 +126,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
     base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
       eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, early.stopping.data = early.stopping.data, par.vals = pv)
+      max.nrounds = max.nrounds, par.vals = pv)
 
   } else {
     stop("Task must be regression or classification")
@@ -150,18 +150,17 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
     }
   }
 
-  base.learner %<<<% preproc.pipeline %>>% cpoDropConstants()
+  preproc.pipeline %<>>% cpoDropConstants()
 
-  #FIXME mlrCPO #39
-  base.learner$properties = c(base.learner$properties, "weights")
+  task.train = task %>>% preproc.pipeline
+  task.test %<>>% retrafo(task.train)
+  base.learner = setHyperPars(base.learner, early.stopping.data = task.test)
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
-
       lrn = setHyperPars(base.learner, par.vals = x)
-      mod = train(lrn, task)
-      test = subsetTask(task, subset = early.stopping.data)
-      pred = predict(mod, test)
+      mod = train(lrn, task.train)
+      pred = predict(mod, task.test)
       nrounds = getBestIteration(mod)
 
       if (tune.threshold && tt == "classif") {

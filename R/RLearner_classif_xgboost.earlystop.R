@@ -20,7 +20,7 @@ makeRLearner.classif.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
-      makeIntegerVectorLearnerParam(id = "early.stopping.data", lower = 0),
+      makeUntypedLearnerParam(id = "early.stopping.data"),
       makeNumericLearnerParam(id = "scale_pos_weight", lower = 0),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
     ),
@@ -43,17 +43,14 @@ trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .wei
     eval_metric = ifelse(nc == 2L, "error", "merror")
   parlist$eval_metric = eval_metric
 
-  train.inds = setdiff(seq_len(getTaskSize(.task)), early.stopping.data)
+  watchlist = list(eval = createDMatrixFromTask(early.stopping.data))
 
   if (is.null(.weights)) {
-    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, early.stopping.data)))
-    data = createDMatrixFromTask(subsetTask(.task, train.inds))
+    data = createDMatrixFromTask(subsetTask(.task, .subset))
   } else {
-    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, early.stopping.data),
-      weights = .weights[early.stopping.data]))
-    data = createDMatrixFromTask(subsetTask(.task, train.inds),
-      weights = .weights[train.inds])
+    data = createDMatrixFromTask(subsetTask(.task, .subset), weights = .weights)
   }
+
   if (is.null(objective))
     objective = ifelse(nc == 2L, "binary:logistic", "multi:softprob")
 
@@ -67,7 +64,7 @@ trainLearner.classif.xgboost.earlystop = function(.learner, .task, .subset, .wei
     mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
       objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L, nthread = nthread)
   } else {
-      mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
+    mod = xgboost::xgb.train(params = parlist, data = data, nrounds = max.nrounds, watchlist = watchlist,
       objective = objective, early_stopping_rounds = early_stopping_rounds, silent = 1L, verbose = 0L)
   }
 

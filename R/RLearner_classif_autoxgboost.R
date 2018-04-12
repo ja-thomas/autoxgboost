@@ -18,7 +18,7 @@ makeRLearner.classif.autoxgboost = function() {
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE),
       makeLogicalLearnerParam(id = "tune.threshold", default = TRUE)
     ),
-    properties = c("twoclass", "multiclass", "numerics", "factors", "prob", "weights", "missings"),
+    properties = c("twoclass", "multiclass", "numerics", "factors", "prob", "missings"),
     name = "Automatic eXtreme Gradient Boosting",
     short.name = "autoxgboost",
     note = ""

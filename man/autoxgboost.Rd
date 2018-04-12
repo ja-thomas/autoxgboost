@@ -54,7 +54,7 @@ Size of the initial design. Default is \code{15L}.}
 
 \item{impact.encoding.boundary}{[\code{integer(1)}]\cr
 Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
+For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = .Machine$integer.max}, all of them get dummy encoded.
 Default is \code{10}.}
 
 \item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
