@@ -1,0 +1,20 @@
+#' @title autoxgboost default parameter set for impact encoding.
+#'
+#' @description
+#'  This is the default parameter set for xgboost that is used for tuning if impact encoding is used.
+#'  For a documentation of the parameter see \code{\link{createImpactFeatures}}.
+#'  By default this set is used:
+#'  \describe{
+#'    \item{slope.param}{Controls the rate of transition \eqn{\lambda}: Between \code{2^-10 = 0.00097...} and \code{4096}.}
+#'    \item{trust.param}{Determines half of the minimal sample size for which we completely "trust" the conditional
+#'   probability of a factor level: Between \code{0} and \code{4096}.}
+#'    }
+#' @name impactencodingparset
+#' @rdname impactencodingparset
+#' @export
+NULL
+
+impactencodingparset = makeParamSet(
+  makeNumericParam("slope.param", lower = 2^-10, upper = 2^12),
+  makeNumericParam("trust.param", lower = 0L, upper = 2^12)
+)
