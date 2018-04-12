@@ -11,6 +11,3 @@ getThreshold = function(optim.result) {
 getBestIteration = function(mod) {
   getLearnerModel(mod, more.unwrap = TRUE)$best_iteration
 }
-
-
-

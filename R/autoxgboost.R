@@ -98,10 +98,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   if (!is.null(nthread))
     pv$nthread = nthread
 
-  rinst = makeResampleInstance(makeResampleDesc("Holdout", split = early.stopping.fraction), task)
-
-  task.test = subsetTask(task, rinst$test.inds[[1]])
-  task = subsetTask(task, rinst$train.inds[[1]])
+  # create base.learner
 
   if (tt == "classif") {
 
@@ -131,6 +128,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   } else {
     stop("Task must be regression or classification")
   }
+
+  # Create pipeline
+
   preproc.pipeline = NULLCPO
 
   if (has.cat.feats) {
@@ -152,9 +152,19 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   preproc.pipeline %<>>% cpoDropConstants()
 
-  task.train = task %>>% preproc.pipeline
+
+  # process data and apply pipeline
+
+  # split early stopping data
+  rinst = makeResampleInstance(makeResampleDesc("Holdout", split = early.stopping.fraction), task)
+  task.test = subsetTask(task, rinst$test.inds[[1]])
+  task.train = subsetTask(task, rinst$train.inds[[1]])
+
+  task.train %<>>% preproc.pipeline
   task.test %<>>% retrafo(task.train)
   base.learner = setHyperPars(base.learner, early.stopping.data = task.test)
+
+  # Optimize
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
@@ -163,7 +173,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
       pred = predict(mod, task.test)
       nrounds = getBestIteration(mod)
 
-      if (tune.threshold && tt == "classif") {
+      if (tune.threshold && getTaskType(task.train) == "classif") {
         tune.res = tuneThreshold(pred = pred, measure = measure)
         res = tune.res$perf
         attr(res, "extras") = list(nrounds = nrounds, .threshold = tune.res$th)
@@ -180,6 +190,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   des = generateDesign(n = design.size, par.set)
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
+
+
   lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set,
     dummy.cols = dummy.cols, impact.cols = impact.cols, preproc.pipeline = preproc.pipeline)
 
