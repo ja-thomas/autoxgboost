@@ -1,18 +1,18 @@
 # This generates a preprocessing pipeline to handle categorical features
 # @param task: the task
 # @param impact.encoding.boundary: See autoxgboost
-# @param categ.featureset: See autoxgboost
 # @return CPOpipeline to transform categorical features
-generateCatFeatPipeline = function(task, impact.encoding.boundary, categ.featureset) {
+generateCatFeatPipeline = function(task, impact.encoding.boundary) {
 
   cat.pipeline = cpoFixFactors()
 
   d = getTaskData(task, target.extra = TRUE)$data
   feat.cols = colnames(d)[vlapply(d, is.factor)]
-
+  categ.featureset = task$feature.information$categ.featureset
   if (!is.null(categ.featureset)) {
-   cat.pipeline %<>>% cpoFeatureHashing(affect.names = categ.featureset)
-   feat.cols = setdiff(feat.cols, categ.featureset)
+    for(cf in categ.featureset)
+      cat.pipeline %<>>% cpoFeatureHashing(affect.names = cf)
+   feat.cols = setdiff(feat.cols, unlist(categ.featureset))
   }
 
   impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]

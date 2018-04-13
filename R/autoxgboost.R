@@ -50,10 +50,6 @@
 #' @param tune.threshold [logical(1)]\cr
 #'   Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tuneThreshold}}.
 #'   Default is \code{TRUE}.
-#' @param timestamps [character()]\cr
-#'   The name of on or multiple columns containing timestamps.
-#' @param categ.featureset [character()]\cr
-#'   Name of categorical features that should be hashed with \code{link[FeatureHashing]{hashed.model.matrix}}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 #' @examples
@@ -67,7 +63,7 @@
 autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, time.budget = 3600L,
   par.set = NULL, max.nrounds = 10^6, early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
   build.final.model = TRUE, design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE, timestamps = NULL, categ.featureset = NULL) {
+  nthread = NULL, tune.threshold = TRUE) {
 
 
   # check inputs
@@ -85,8 +81,6 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   assertIntegerish(impact.encoding.boundary, lower = 0, len = 1L)
   assertIntegerish(nthread, lower = 1, len = 1L, null.ok = TRUE)
   assertFlag(tune.threshold)
-  assertCharacter(timestamps, null.ok = TRUE)
-  assertCharacter(categ.featureset, null.ok = TRUE)
 
   # set defaults
   measure = coalesce(measure, getDefaultMeasure(task))
@@ -139,10 +133,10 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   preproc.pipeline = NULLCPO
 
-  if (!is.null(timestamps))
-    preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = timestamps)
+  if (!is.null(task$feature.information$timestamps))
+    preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = unlist(task$feature.information$timestamps))
   if (has.cat.feats) {
-    preproc.pipeline %<>>% generateCatFeatPipeline(task, impact.encoding.boundary, categ.featureset)
+    preproc.pipeline %<>>% generateCatFeatPipeline(task, impact.encoding.boundary)
   }
 
   preproc.pipeline %<>>% cpoDropConstants()
