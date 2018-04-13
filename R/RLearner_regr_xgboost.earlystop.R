@@ -64,5 +64,5 @@ trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weight
 #' @export
 predictLearner.regr.xgboost.earlystop = function(.learner, .model, .newdata, ...) {
   m = .model$learner.model
-  p = predict(m, newdata = data.matrix(.newdata), ...)
+  p = predict(m, newdata = data.matrix(convertDataFrameCols(.newdata, ints.as.num = TRUE)), ...)
 }

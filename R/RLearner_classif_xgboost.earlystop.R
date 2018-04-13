@@ -82,7 +82,7 @@ predictLearner.classif.xgboost.earlystop = function(.learner, .model, .newdata, 
   if (is.null(obj))
     .learner$par.vals$objective = ifelse(nc == 2L, "binary:logistic", "multi:softprob")
 
-  p = predict(m, newdata = data.matrix(.newdata), ...)
+  p = predict(m, newdata = data.matrix(convertDataFrameCols(.newdata, ints.as.num = TRUE)), ...)
 
   if (nc == 2L) { #binaryclass
     if (.learner$par.vals$objective == "multi:softprob") {

@@ -75,7 +75,7 @@ trainLearner.classif.xgboost.custom = function(.learner, .task, .subset, .weight
 
   task.data = getTaskData(.task, .subset, target.extra = TRUE)
   label = match(as.character(task.data$target), td$class.levels) - 1
-  parlist$data = xgboost::xgb.DMatrix(data = data.matrix(task.data$data), label = label)
+  parlist$data = xgboost::xgb.DMatrix(data = data.matrix(convertDataFrameCols(task.data$data, ints.as.num = TRUE)), label = label)
 
   if (!is.null(.weights))
     xgboost::setinfo(parlist$data, "weight", .weights)
@@ -97,7 +97,7 @@ predictLearner.classif.xgboost.custom = function(.learner, .model, .newdata, ...
   if (is.null(obj))
     .learner$par.vals$objective = ifelse(nc == 2L, "binary:logistic", "multi:softprob")
 
-  p = predict(m, newdata = data.matrix(.newdata), ...)
+  p = predict(m, newdata = data.matrix(convertDataFrameCols(.newdata, ints.as.num = TRUE)), ...)
 
   if (nc == 2L) { #binaryclass
     if (.learner$par.vals$objective == "multi:softprob") {

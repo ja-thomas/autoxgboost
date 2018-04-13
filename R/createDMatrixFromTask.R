@@ -1,7 +1,7 @@
 createDMatrixFromTask = function(task, weights = NULL) {
 
   data = getTaskData(task, target.extra = TRUE)
-
+  data$data = convertDataFrameCols(data$data, ints.as.num = TRUE)
   if (getTaskType(task) == "classif")  {
     cl = getTaskClassLevels(task)
     data$target =  match(as.character(data$target), cl) - 1

@@ -63,7 +63,7 @@ trainLearner.regr.xgboost.custom = function(.learner, .task, .subset, .weights =
     parlist$objective = "reg:linear"
 
   task.data = getTaskData(.task, .subset, target.extra = TRUE)
-  parlist$data = xgboost::xgb.DMatrix(data = data.matrix(task.data$data), label = task.data$target)
+  parlist$data = xgboost::xgb.DMatrix(data = data.matrix(convertDataFrameCols(task.data$data, ints.as.num = TRUE)), label = task.data$target)
 
   if (!is.null(.weights))
     xgboost::setinfo(parlist$data, "weight", .weights)
@@ -77,5 +77,5 @@ trainLearner.regr.xgboost.custom = function(.learner, .task, .subset, .weights =
 #' @export
 predictLearner.regr.xgboost.custom = function(.learner, .model, .newdata, ...) {
   m = .model$learner.model
-  predict(m, newdata = data.matrix(.newdata), ...)
+  predict(m, newdata = data.matrix(convertDataFrameCols(.newdata, ints.as.num = TRUE)), ...)
 }
