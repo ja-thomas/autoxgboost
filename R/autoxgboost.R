@@ -52,6 +52,8 @@
 #'   Default is \code{TRUE}.
 #' @param timestamps [character()]\cr
 #'   The name of on or multiple columns containing timestamps.
+#' @param categ.featureset [character()]\cr
+#'   Name of categorical features that should be hashed with \code{link[FeatureHashing]{hashed.model.matrix}}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 #' @examples
@@ -65,7 +67,7 @@
 autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, time.budget = 3600L,
   par.set = NULL, max.nrounds = 10^6, early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
   build.final.model = TRUE, design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE, timestamps = NULL) {
+  nthread = NULL, tune.threshold = TRUE, timestamps = NULL, categ.featureset = NULL) {
 
 
   # check inputs
@@ -84,6 +86,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   assertIntegerish(nthread, lower = 1, len = 1L, null.ok = TRUE)
   assertFlag(tune.threshold)
   assertCharacter(timestamps, null.ok = TRUE)
+  assertCharacter(categ.featureset, null.ok = TRUE)
 
   # set defaults
   measure = coalesce(measure, getDefaultMeasure(task))
@@ -138,22 +141,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   if (!is.null(timestamps))
     preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = timestamps)
-
   if (has.cat.feats) {
-    preproc.pipeline %<>>% cpoFixFactors()
-    d = getTaskData(task, target.extra = TRUE)$data
-    feat.cols = colnames(d)[vlapply(d, is.factor)]
-    impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
-    dummy.cols = setdiff(feat.cols, impact.cols)
-    if (length(dummy.cols) > 0L)
-        preproc.pipeline %<>>% cpoDummyEncode(affect.names = dummy.cols)
-    if (length(impact.cols) > 0L) {
-      if (tt == "classif") {
-        preproc.pipeline %<>>% cpoImpactEncodeClassif(affect.names = impact.cols)
-      } else {
-        preproc.pipeline %<>>% cpoImpactEncodeRegr(affect.names = impact.cols)
-      }
-    }
+    preproc.pipeline %<>>% generateCatFeatPipeline(task, impact.encoding.boundary, categ.featureset)
   }
 
   preproc.pipeline %<>>% cpoDropConstants()

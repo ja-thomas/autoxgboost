@@ -17,10 +17,13 @@ r_packages:
   - cmaes
   - rgenoud
   - checkmate
+  - Featurehashing
+  - lubridate
 
 r_github_packages:
   - jimhester/covr
   - mlr-org/mlrCPO
+  - eddelbuettel/anytime
 
 warnings_are_errors: true
 

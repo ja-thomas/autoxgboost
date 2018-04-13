@@ -26,5 +26,8 @@ Suggests:
     testthat,
     rpart,
     cmaes,
-    rgenoud
+    rgenoud,
+    FeatureHashing,
+    anytime,
+    lubridate
 RoxygenNote: 6.0.1

@@ -9,7 +9,7 @@ autoxgboost(task, measure = NULL, control = NULL, iterations = 160L,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
   build.final.model = TRUE, design.size = 15L,
   impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL,
-  tune.threshold = TRUE, timestamps = NULL)
+  tune.threshold = TRUE, timestamps = NULL, categ.featureset = NULL)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -71,6 +71,9 @@ Default is \code{TRUE}.}
 
 \item{timestamps}{[character()]\cr
 The name of on or multiple columns containing timestamps.}
+
+\item{categ.featureset}{[character()]\cr
+Name of categorical features that should be hashed with \code{link[FeatureHashing]{hashed.model.matrix}}.}
 }
 \value{
 \code{\link{AutoxgbResult}}

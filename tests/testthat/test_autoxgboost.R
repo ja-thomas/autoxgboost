@@ -1,7 +1,7 @@
-checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, control, mbo.learner, tune.threshold) {
+checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, control, mbo.learner, tune.threshold, timestamps = NULL, categ.featureset = NULL) {
     r = autoxgboost(task, build.final.model = build.final.model, max.nrounds = 1L,
       impact.encoding.boundary = impact.encoding.boundary, control = control,
-      mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold)
+      mbo.learner = mbo.learner, nthread = 1, tune.threshold = tune.threshold,  timestamps = timestamps, categ.featureset = categ.featureset)
     td = getTaskDesc(task)
 
     expect_class(r, "AutoxgbResult")
@@ -64,8 +64,15 @@ test_that("autoxgboost thresholding works",  {
 context("Timestamps")
 test_that("Timestamps work", {
     checkAutoxgboost(task = iris.time, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
-    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE, timestamps = "time1")
 })
+
+context("Featurehashing")
+test_that("Featurehashing work", {
+    checkAutoxgboost(task = iris.fac, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE, categ.featureset = c("bla", "bla2"))
+})
+
 
 context("Printer")
 test_that("autoxgboost printer works", {
