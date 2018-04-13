@@ -27,14 +27,6 @@ checkAutoxgboost = function(task, build.final.model, impact.encoding.boundary, c
 context("Different Tasks")
 test_that("autoxgboost works on different tasks",  {
 
-  iris.fac = droplevels(iris[1:100,])
-  iris.fac$bla = as.factor(sample(c("A", "B"), 100, T))
-  iris.fac = makeClassifTask(data = iris.fac, target = "Species")
-
-  iris.miss = iris
-  iris.miss[4,3] = NA
-  iris.miss = makeClassifTask(data = iris.miss, target = "Species")
-
   tasks = list(
     sonar.task, #binary classification
     iris.fac, #binary classification with factors
@@ -43,7 +35,7 @@ test_that("autoxgboost works on different tasks",  {
     iris.fac
   )
 
-  for (im in c(0L, .Machine$integer.max)) {
+  for (im in c(0L, 2L, .Machine$integer.max)) {
     for (t in tasks) {
       checkAutoxgboost(task = t, build.final.model = TRUE, impact.encoding.boundary = im,
         control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
@@ -56,8 +48,9 @@ context("Thresholds")
 test_that("autoxgboost thresholding works",  {
   checkAutoxgboost(task = sonar.task, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
     control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
-  checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
-    control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
+  #FIXME: Wait for faster multiclass threshold tuning in mlr
+  #checkAutoxgboost(task = iris.task, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
+  #  control = ctrl, mbo.learner = mbo.learner, tune.threshold = TRUE)
 })
 
 #context("Weights")
@@ -67,6 +60,12 @@ test_that("autoxgboost thresholding works",  {
 #  checkAutoxgboost(task = iris.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = .Machine$integer.max, control = ctrl, tune.threshold = FALSE)
 #  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = .Machine$integer.max, control = ctrl, tune.threshold = FALSE)
 #})
+
+context("Timestamps")
+test_that("Timestamps work", {
+    checkAutoxgboost(task = iris.time, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
+    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+})
 
 context("Printer")
 test_that("autoxgboost printer works", {

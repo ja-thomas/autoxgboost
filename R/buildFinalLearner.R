@@ -1,6 +1,5 @@
 # Create xgboost learner based on the optimization result
-buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.set,
-  dummy.cols = character(0L), impact.cols = character(0L), preproc.pipeline) {
+buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.set, preproc.pipeline) {
 
   nrounds = getBestNrounds(optim.result)
   pars = trafoValue(par.set, optim.result$x)

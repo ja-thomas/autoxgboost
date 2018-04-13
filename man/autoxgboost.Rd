@@ -9,7 +9,7 @@ autoxgboost(task, measure = NULL, control = NULL, iterations = 160L,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
   build.final.model = TRUE, design.size = 15L,
   impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL,
-  tune.threshold = TRUE)
+  tune.threshold = TRUE, timestamps = NULL)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -68,6 +68,9 @@ If \code{NULL} (default), xgboost will determine internally how many cores to us
 \item{tune.threshold}{[logical(1)]\cr
 Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tuneThreshold}}.
 Default is \code{TRUE}.}
+
+\item{timestamps}{[character()]\cr
+The name of on or multiple columns containing timestamps.}
 }
 \value{
 \code{\link{AutoxgbResult}}

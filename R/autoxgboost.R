@@ -50,6 +50,8 @@
 #' @param tune.threshold [logical(1)]\cr
 #'   Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tuneThreshold}}.
 #'   Default is \code{TRUE}.
+#' @param timestamps [character()]\cr
+#'   The name of on or multiple columns containing timestamps.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 #' @examples
@@ -60,18 +62,18 @@
 #' res = autoxgboost(iris.task, control = ctrl, tune.threshold = FALSE)
 #' res
 #' }
-autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, time.budget = 3600L, par.set = NULL, max.nrounds = 10^6,
-  early.stopping.rounds = 10L, early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE) {
+autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, time.budget = 3600L,
+  par.set = NULL, max.nrounds = 10^6, early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
+  build.final.model = TRUE, design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
+  nthread = NULL, tune.threshold = TRUE, timestamps = NULL) {
 
 
   # check inputs
-  assertClass(task, "SupervisedTask", null.ok = FALSE)
+  assertClass(task, "SupervisedTask")
   assertClass(measure, "Measure", null.ok = TRUE)
   assertClass(control, "MBOControl", null.ok = TRUE)
-  assertIntegerish(iterations, null.ok = FALSE)
-  assertIntegerish(time.budget, null.ok = FALSE)
+  assertIntegerish(iterations)
+  assertIntegerish(time.budget)
   assertClass(par.set, "ParamSet", null.ok = TRUE)
   assertIntegerish(max.nrounds, lower = 1L, len = 1L)
   assertIntegerish(early.stopping.rounds, lower = 1L, len = 1L)
@@ -81,6 +83,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   assertIntegerish(impact.encoding.boundary, lower = 0, len = 1L)
   assertIntegerish(nthread, lower = 1, len = 1L, null.ok = TRUE)
   assertFlag(tune.threshold)
+  assertCharacter(timestamps, null.ok = TRUE)
 
   # set defaults
   measure = coalesce(measure, getDefaultMeasure(task))
@@ -132,6 +135,9 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   # Create pipeline
 
   preproc.pipeline = NULLCPO
+
+  if (!is.null(timestamps))
+    preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = timestamps)
 
   if (has.cat.feats) {
     preproc.pipeline %<>>% cpoFixFactors()
@@ -192,8 +198,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
 
-  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set,
-    dummy.cols = dummy.cols, impact.cols = impact.cols, preproc.pipeline = preproc.pipeline)
+  lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set, preproc.pipeline = preproc.pipeline)
 
   mod = NULL
   if(build.final.model)
