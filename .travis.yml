@@ -17,7 +17,7 @@ r_packages:
   - cmaes
   - rgenoud
   - checkmate
-  - Featurehashing
+  - FeatureHashing
   - lubridate
 
 r_github_packages:
