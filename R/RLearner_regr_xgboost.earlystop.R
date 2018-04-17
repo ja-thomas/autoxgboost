@@ -20,7 +20,7 @@ makeRLearner.regr.xgboost.earlystop = function() {
       makeNumericLearnerParam(id = "base_score", default = 0.5, tunable = FALSE),
       makeIntegerLearnerParam(id = "early_stopping_rounds", default = 1, lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "max.nrounds", default = 10^6L, lower = 1L, upper = 10^7L),
-      makeIntegerVectorLearnerParam(id = "early.stopping.data", lower = 0),
+      makeUntypedLearnerParam(id = "early.stopping.data"),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE)
     ),
     properties = c("numerics", "weights", "missings"),
@@ -39,16 +39,12 @@ trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weight
     eval_metric = "rmse"
   parlist$eval_metric = eval_metric
 
-  train.inds = setdiff(seq_len(getTaskSize(.task)), early.stopping.data)
+  watchlist = list(eval = createDMatrixFromTask(early.stopping.data))
 
   if (is.null(.weights)) {
-    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, early.stopping.data)))
-    data = createDMatrixFromTask(subsetTask(.task, train.inds))
+    data = createDMatrixFromTask(subsetTask(.task, .subset))
   } else {
-    watchlist = list(eval = createDMatrixFromTask(subsetTask(.task, early.stopping.data),
-      weights = .weights[early.stopping.data]))
-    data = createDMatrixFromTask(subsetTask(.task, train.inds),
-      weights = .weights[train.inds])
+    data = createDMatrixFromTask(subsetTask(.task, .subset), weights = .weights)
   }
 
   if (is.null(objective))
@@ -68,5 +64,5 @@ trainLearner.regr.xgboost.earlystop = function(.learner, .task, .subset, .weight
 #' @export
 predictLearner.regr.xgboost.earlystop = function(.learner, .model, .newdata, ...) {
   m = .model$learner.model
-  p = predict(m, newdata = data.matrix(.newdata), ...)
+  p = predict(m, newdata = data.matrix(convertDataFrameCols(.newdata, ints.as.num = TRUE)), ...)
 }

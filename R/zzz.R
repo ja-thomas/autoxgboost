@@ -5,6 +5,7 @@
 #' @import xgboost
 #' @import BBmisc
 #' @import checkmate
+#' @import mlrCPO
 #' @importFrom stats predict
 #' @importFrom stats runif
 #' @importFrom stats aggregate

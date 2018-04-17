@@ -30,8 +30,11 @@ print.AutoxgbResult = function(x, ...) {
     }
   }
 
-  catf("\nWith tuning result: %s = %.3f", x$measure$id, x$optim.result$y)
 
+  catf("\n\nPreprocessing pipeline:")
+      print(x$preproc.pipeline)
+
+  catf("\nWith tuning result: %s = %.3f", x$measure$id, x$optim.result$y)
   if (!is.null(thr)) {
     if (length(thr) == 1) {
       catf("Classification Threshold: %.3f", thr)

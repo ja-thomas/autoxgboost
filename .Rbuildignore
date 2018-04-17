@@ -13,3 +13,5 @@ meta
 ^.+_files$
 ^vignettes/.+\.html$
 xgboost.model
+test.R
+todo-files

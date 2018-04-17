@@ -4,11 +4,12 @@
 \alias{autoxgboost}
 \title{Fit and optimize a xgboost model.}
 \usage{
-autoxgboost(task, measure = NULL, control = NULL, par.set = NULL,
-  max.nrounds = 10^6, early.stopping.rounds = 10L,
-  early.stopping.fraction = 4/5, build.final.model = TRUE,
-  design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE)
+autoxgboost(task, measure = NULL, control = NULL, iterations = 160L,
+  time.budget = 3600L, par.set = NULL, max.nrounds = 10^6,
+  early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
+  build.final.model = TRUE, design.size = 15L,
+  impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL,
+  tune.threshold = TRUE)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -18,34 +19,43 @@ The task.}
 Performance measure. If \code{NULL} \code{\link[mlr]{getDefaultMeasure}} is used.}
 
 \item{control}{[\code{\link[mlrMBO]{MBOControl}}]\cr
-Control object for mbo. Specifies runtime behaviour.
-Default is to run for 160 iterations or 1 hour, whatever happens first.}
+Control object for optimizer.
+If not specified, the default \code{\link[mlrMBO]{makeMBOControl}}] object will be used with
+\code{iterations} maximum iterations and a maximum runtime of \code{time.budget} seconds.}
+
+\item{iterations}{[\code{integer(1L}]\cr
+Number of MBO iterations to do. Will be ignored if custom \code{control} is used.
+Default is \code{160}.}
+
+\item{time.budget}{[\code{integer(1L}]\cr
+Time that can be used for tuning (in seconds). Will be ignored if custom \code{control} is used.
+Default is \code{3600}, i.e., one hour.}
 
 \item{par.set}{[\code{\link[ParamHelpers]{ParamSet}}]\cr
-Parameter set. Default is \code{\link{autoxgbparset}}.}
+Parameter set to tune over. Default is \code{\link{autoxgbparset}}.}
 
 \item{max.nrounds}{[\code{integer(1)}]\cr
-Maximum number of allowed iterations. Default is \code{10^6}.}
+Maximum number of allowed boosting iterations. Default is \code{10^6}.}
 
 \item{early.stopping.rounds}{[\code{integer(1L}]\cr
-After how many iterations without an improvement in the OOB error should be stopped?
-Default is 10.}
+After how many iterations without an improvement in the boosting OOB error should be stopped?
+Default is \code{10}.}
 
 \item{early.stopping.fraction}{[\code{numeric(1)}]\cr
 What fraction of the data should be used for early stopping (i.e. as a validation set).
 Default is \code{4/5}.}
 
 \item{build.final.model}{[\code{logical(1)}]\cr
-Should the best found model be fitted on the complete dataset?
+Should the model with the best found configuration be refitted on the complete dataset?
 Default is \code{FALSE}.}
 
 \item{design.size}{[\code{integer(1)}]\cr
 Size of the initial design. Default is \code{15L}.}
 
 \item{impact.encoding.boundary}{[\code{integer(1)}]\cr
-Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded (see \code{\link{createImpactFeatures}}) while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
-(see \code{\link[mlr]{createDummyFeatures}}). For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = Inf}, all of them get dummy encoded.
-Default is \code{10L}.}
+Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = .Machine$integer.max}, all of them get dummy encoded.
+Default is \code{10}.}
 
 \item{mbo.learner}{[\code{\link[mlr]{Learner}}]\cr
 Regression learner from mlr, which is used as a surrogate to model our fitness function.
