@@ -44,13 +44,13 @@ makeRLearner.classif.lightgbm = function() {
 }
 
 #' @export
-trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NULL, validation.data = NULL, ...) {
+trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NULL, validation.data = NULL, metric, ...) {
 
   pv = list(...)
   nc = length(getTaskDesc(.task)$class.levels)
   train = getTaskData(.task, .subset, target.extra = TRUE)
   feat.cols = colnames(train$data)[vlapply(train$data, is.factor)]
-  prep = lgb.prepare_rules(train$train)
+  prep = lgb.prepare_rules(train$data)
   pv$data = lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
   if (!is.null(validation.data))
     pv$valids = list(test = lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
@@ -74,8 +74,31 @@ predictLearner.classif.lightgbm = function(.learner, .model, .newdata, ...) {
   cls = td$class.levels
   nc = length(cls)
 
+  .newdata = data.matrix(lgb.prepare_rules(.newdata, rules = m$rules)$data)
+  p = predict(m$mod, .newdata)
+
   if (nc == 2) {
-    predict(m,
-
-
+    y = matrix(0, ncol = 2, nrow = nrow(.newdata))
+    colnames(y) = cls
+    y[, 1L] = 1 - p
+    y[, 2L] = p
+     if (.learner$predict.type == "prob") {
+      return(y)
+    } else {
+      p = colnames(y)[max.col(y)]
+      names(p) = NULL
+      p = factor(p, levels = colnames(y))
+      return(p)
+    }
+  } else {
+     p = matrix(p, nrow = length(p) / nc, ncol = nc, byrow = TRUE)
+     colnames(p) = cls
+     if (.learner$predict.type == "prob") {
+        return(p)
+     } else {
+        ind = max.col(p)
+        cns = colnames(p)
+        return(factor(cns[ind], levels = cns))
+    }
+  }
 }
