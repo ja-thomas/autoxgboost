@@ -21,6 +21,6 @@ iris.miss = iris
 iris.miss[4,3] = NA
 iris.miss = makeClassifTask(data = iris.miss, target = "Species")
 
-iris.time = iris
-iris.time$time1 = as.numeric(as.POSIXlt(runif(150, 0, 10^5), origin = "2017-02-03 08:00:00"))
-iris.time = makeClassifTask(data = iris.time, target = "Species")
+#iris.time = iris
+#iris.time$time1 = as.numeric(as.POSIXlt(runif(150, 0, 10^5), origin = "2017-02-03 08:00:00"))
+#iris.time = makeClassifTask(data = iris.time, target = "Species")

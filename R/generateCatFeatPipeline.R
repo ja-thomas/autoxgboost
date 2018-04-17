@@ -8,12 +8,12 @@ generateCatFeatPipeline = function(task, impact.encoding.boundary) {
 
   d = getTaskData(task, target.extra = TRUE)$data
   feat.cols = colnames(d)[vlapply(d, is.factor)]
-  categ.featureset = task$feature.information$categ.featureset
-  if (!is.null(categ.featureset)) {
-    for(cf in categ.featureset)
-      cat.pipeline %<>>% cpoFeatureHashing(affect.names = cf)
-   feat.cols = setdiff(feat.cols, unlist(categ.featureset))
-  }
+  #categ.featureset = task$feature.information$categ.featureset
+  #if (!is.null(categ.featureset)) {
+  #  for(cf in categ.featureset)
+  #    cat.pipeline %<>>% cpoFeatureHashing(affect.names = cf)
+  # feat.cols = setdiff(feat.cols, unlist(categ.featureset))
+  #}
 
   impact.cols = colnames(d)[vlapply(d, function(x) is.factor(x) && nlevels(x) > impact.encoding.boundary)]
   dummy.cols = setdiff(feat.cols, impact.cols)

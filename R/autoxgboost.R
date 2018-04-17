@@ -133,8 +133,8 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   preproc.pipeline = NULLCPO
 
-  if (!is.null(task$feature.information$timestamps))
-    preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = unlist(task$feature.information$timestamps))
+  #if (!is.null(task$feature.information$timestamps))
+  #  preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = unlist(task$feature.information$timestamps))
   if (has.cat.feats) {
     preproc.pipeline %<>>% generateCatFeatPipeline(task, impact.encoding.boundary)
   }

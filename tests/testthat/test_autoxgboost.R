@@ -61,19 +61,19 @@ test_that("autoxgboost thresholding works",  {
 #  checkAutoxgboost(task = bh.weighted, build.final.model = FALSE, mbo.learner = mbo.learner, impact.encoding.boundary = .Machine$integer.max, control = ctrl, tune.threshold = FALSE)
 #})
 
-context("Timestamps")
-test_that("Timestamps work", {
-    iris.time = addFeatureInformation(iris.time, "timestamps", "time1")
-    checkAutoxgboost(task = iris.time, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
-    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
-})
-
-context("Featurehashing")
-test_that("Featurehashing work", {
-    iris.fac = addFeatureInformation(iris.fac, "categ.featuresets", c("bla", "bla2"))
-    checkAutoxgboost(task = iris.fac, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
-    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
-})
+#context("Timestamps")
+#test_that("Timestamps work", {
+#    iris.time = addFeatureInformation(iris.time, "timestamps", "time1")
+#    checkAutoxgboost(task = iris.time, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
+#    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+#})
+#
+#context("Featurehashing")
+#test_that("Featurehashing work", {
+#    iris.fac = addFeatureInformation(iris.fac, "categ.featuresets", c("bla", "bla2"))
+#    checkAutoxgboost(task = iris.fac, build.final.model = TRUE, impact.encoding.boundary = .Machine$integer.max,
+#    control = ctrl, mbo.learner = mbo.learner, tune.threshold = FALSE)
+#})
 
 
 context("Printer")
