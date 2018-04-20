@@ -50,10 +50,10 @@ trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NU
   nc = length(getTaskDesc(.task)$class.levels)
   train = getTaskData(.task, .subset, target.extra = TRUE)
   feat.cols = colnames(train$data)[vlapply(train$data, is.factor)]
-  prep = lgb.prepare_rules(train$data)
-  pv$data = lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
+  prep = lightgbm::lgb.prepare_rules(train$data)
+  pv$data = lightgbm::lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
   if (!is.null(validation.data))
-    pv$valids = list(test = lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
+    pv$valids = list(test = lightgbm::lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
   pv$metric = coalesce(metric, "")
 
   if(nc == 2) {
@@ -63,7 +63,7 @@ trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NU
     pv$num_class = nc
   }
 
-  mod = do.call(lgb.train, pv)
+  mod = do.call(lightgbm::lgb.train, pv)
   return(list(mod = mod, rules = prep$rules))
 }
 
@@ -74,7 +74,7 @@ predictLearner.classif.lightgbm = function(.learner, .model, .newdata, ...) {
   cls = td$class.levels
   nc = length(cls)
 
-  .newdata = data.matrix(lgb.prepare_rules(.newdata, rules = m$rules)$data)
+  .newdata = data.matrix(lightgbm::lgb.prepare_rules(.newdata, rules = m$rules)$data)
   p = predict(m$mod, .newdata)
 
   if (nc == 2) {
