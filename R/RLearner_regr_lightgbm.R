@@ -1,12 +1,13 @@
 #' @export
-makeRLearner.classif.lightgbm = function() {
-  makeRLearnerClassif(
-    cl = "classif.lightgbm",
+makeRLearner.regr.lightgbm = function() {
+  makeRLearnerRegr(
+    cl = "regr.lightgbm",
     package = "lightgbm",
     par.set = makeParamSet(
       makeUntypedLearnerParam("validation.data"),
       makeIntegerLearnerParam("nrounds", lower = 1, default = 10),
-      makeDiscreteLearnerParam("metric", values = c("map", "auc", "binary_logloss", "binary_error", "multi_logloss", "multi_error")),
+      makeDiscreteLearnerParam("metric", values = c("l1", "l2", "l2_root", "quantile", "mape", "huber", "fair")),
+      makeDiscreteLearnerParam("obj", values = c("regression_l2", "regression_l1", "huber", "fair", "poisson", "quantile", "mape", "gamma", "tweedie", default = "regression_l2")),
       makeIntegerLearnerParam("verbose", lower = -1, upper = 1, tunable = FALSE),
       makeLogicalLearnerParam("record", default = TRUE, tunable = FALSE),
       makeIntegerLearnerParam("eval_freq", lower = 1, tunable = FALSE, requires = quote(verbose > 0)),
@@ -36,7 +37,7 @@ makeRLearner.classif.lightgbm = function() {
       makeNumericLearnerParam("cat_l2", lower = 0, default = 10),
       makeIntegerLearnerParam("max_cat_to_onehot", lower = 0, default = 4)
       ),
-    properties = c("twoclass", "multiclass", "numerics", "factors", "prob", "missings", "factors"),
+    properties = c("numerics", "weights", "featimp", "missings", "factors"),
     name = "Light Gradient Boosting Machine",
     short.name = "lightgbm",
     note = ""
@@ -44,61 +45,24 @@ makeRLearner.classif.lightgbm = function() {
 }
 
 #' @export
-trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NULL, validation.data = NULL, metric, ...) {
+trainLearner.regr.lightgbm = function(.learner, .task, .subset, .weights = NULL, validation.data = NULL, metric, ...) {
 
   pv = list(...)
-  nc = length(getTaskDesc(.task)$class.levels)
   train = getTaskData(.task, .subset, target.extra = TRUE)
   feat.cols = colnames(train$data)[vlapply(train$data, is.factor)]
-  prep = lightgbm::lgb.prepare_rules(train$data)
-  pv$data = lightgbm::lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
+  prep = lgb.prepare_rules(train$data)
+  pv$data = lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
   if (!is.null(validation.data))
-    pv$valids = list(test = lightgbm::lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
+    pv$valids = list(test = lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
   pv$metric = coalesce(metric, "")
 
-  if(nc == 2) {
-    pv$objective = "binary"
-  } else {
-    pv$objective = "multiclass"
-    pv$num_class = nc
-  }
-
-  mod = do.call(lightgbm::lgb.train, pv)
+  mod = do.call(lgb.train, pv)
   return(list(mod = mod, rules = prep$rules))
 }
 
 #' @export
-predictLearner.classif.lightgbm = function(.learner, .model, .newdata, ...) {
-  td = .model$task.desc
+predictLearner.regr.lightgbm = function(.learner, .model, .newdata, ...) {
   m = .model$learner.model
-  cls = td$class.levels
-  nc = length(cls)
-
-  .newdata = data.matrix(lightgbm::lgb.prepare_rules(.newdata, rules = m$rules)$data)
-  p = predict(m$mod, .newdata)
-
-  if (nc == 2) {
-    y = matrix(0, ncol = 2, nrow = nrow(.newdata))
-    colnames(y) = cls
-    y[, 1L] = 1 - p
-    y[, 2L] = p
-     if (.learner$predict.type == "prob") {
-      return(y)
-    } else {
-      p = colnames(y)[max.col(y)]
-      names(p) = NULL
-      p = factor(p, levels = colnames(y))
-      return(p)
-    }
-  } else {
-     p = matrix(p, nrow = length(p) / nc, ncol = nc, byrow = TRUE)
-     colnames(p) = cls
-     if (.learner$predict.type == "prob") {
-        return(p)
-     } else {
-        ind = max.col(p)
-        cns = colnames(p)
-        return(factor(cns[ind], levels = cns))
-    }
-  }
-}
+  .newdata = data.matrix(lgb.prepare_rules(.newdata, rules = m$rules)$data)
+  predict(m$mod, .newdata)
+ }
