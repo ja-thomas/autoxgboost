@@ -21,6 +21,7 @@ Imports:
     stringi,
     DiceKriging,
     xgboost (>= 0.6.4),
+    lightgbm,
     smoof
 Suggests:
     testthat,

@@ -23,7 +23,7 @@
 #'   Time that can be used for tuning (in seconds). Will be ignored if custom \code{control} is used.
 #'   Default is \code{3600}, i.e., one hour.
 #' @param par.set [\code{\link[ParamHelpers]{ParamSet}}]\cr
-#'   Parameter set to tune over. Default is \code{\link{autoxgbparset}}.
+#'   Parameter set to tune over. Default is \code{\link{autoxgbparset}} or \code{\link{lightgbmparset}}, depending on \code{boosting.backend}.
 #' @param max.nrounds [\code{integer(1)}]\cr
 #'   Maximum number of allowed boosting iterations. Default is \code{10^6}.
 #' @param early.stopping.rounds [\code{integer(1L}]\cr
@@ -50,6 +50,8 @@
 #' @param tune.threshold [logical(1)]\cr
 #'   Should thresholds be tuned? This has only an effect for classification, see \code{\link[mlr]{tuneThreshold}}.
 #'   Default is \code{TRUE}.
+#' @param boosting.backend [\character(1)]\cr
+#'   What boosting framework should be used? Currently supported are \code{"xgboost"} and \code{"lightgbm"}.
 #' @return \code{\link{AutoxgbResult}}
 #' @export
 #' @examples
@@ -63,7 +65,7 @@
 autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, time.budget = 3600L,
   par.set = NULL, max.nrounds = 10^6, early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
   build.final.model = TRUE, design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
-  nthread = NULL, tune.threshold = TRUE) {
+  nthread = NULL, tune.threshold = TRUE, boosting.backend = "xgboost") {
 
 
   # check inputs
@@ -88,54 +90,23 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
     control = makeMBOControl()
     control = setMBOControlTermination(control, iters = iterations, time.budget = time.budget)
   }
-  par.set = coalesce(par.set, autoxgboost::autoxgbparset)
+
 
 
   tt = getTaskType(task)
   td = getTaskDesc(task)
   has.cat.feats = sum(td$n.feat[c("factors", "ordered")]) > 0
-  pv = list()
-  if (!is.null(nthread))
-    pv$nthread = nthread
 
-  # create base.learner
+  base.learner = createBaseLearner(boosting.backend, td, tt, measure, tune.threshold, nthread, early.stopping.rounds, max.nrounds, impact.encoding.boundary)
+  if (!is.null(par.set))
+    par.set = getDefaultParSet(base.learner, has.cat.feats)
 
-  if (tt == "classif") {
-
-    predict.type = ifelse("req.prob" %in% measure$properties | tune.threshold, "prob", "response")
-    if(length(td$class.levels) == 2) {
-      objective = "binary:logistic"
-      eval_metric = "error"
-      par.set = c(par.set, makeParamSet(makeNumericParam("scale_pos_weight", lower = -10, upper = 10, trafo = function(x) 2^x)))
-    } else {
-      objective = "multi:softprob"
-      eval_metric = "merror"
-    }
-
-    base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, par.vals = pv)
-
-  } else if (tt == "regr") {
-    predict.type = NULL
-    objective = "reg:linear"
-    eval_metric = "rmse"
-
-    base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
-      max.nrounds = max.nrounds, par.vals = pv)
-
-  } else {
-    stop("Task must be regression or classification")
-  }
 
   # Create pipeline
 
   preproc.pipeline = NULLCPO
 
-  #if (!is.null(task$feature.information$timestamps))
-  #  preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = unlist(task$feature.information$timestamps))
-  if (has.cat.feats) {
+  if (has.cat.feats && "factors" %nin% getLearnerProperties(base.learner)) {
     preproc.pipeline %<>>% generateCatFeatPipeline(task, impact.encoding.boundary)
   }
 
@@ -154,7 +125,6 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   base.learner = setHyperPars(base.learner, early.stopping.data = task.test)
 
   # Optimize
-
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
       lrn = setHyperPars(base.learner, par.vals = x)
