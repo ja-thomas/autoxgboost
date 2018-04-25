@@ -4,7 +4,7 @@ makeRLearner.regr.lightgbm = function() {
     cl = "regr.lightgbm",
     package = "lightgbm",
     par.set = makeParamSet(
-      makeUntypedLearnerParam("validation.data"),
+      makeUntypedLearnerParam("early.stopping.data"),
       makeIntegerLearnerParam("nrounds", lower = 1, default = 10),
       makeDiscreteLearnerParam("metric", values = c("l1", "l2", "l2_root", "quantile", "mape", "huber", "fair")),
       makeDiscreteLearnerParam("obj", values = c("regression_l2", "regression_l1", "huber", "fair", "poisson", "quantile", "mape", "gamma", "tweedie", default = "regression_l2")),
@@ -46,15 +46,15 @@ makeRLearner.regr.lightgbm = function() {
 }
 
 #' @export
-trainLearner.regr.lightgbm = function(.learner, .task, .subset, .weights = NULL, validation.data = NULL, metric, ...) {
+trainLearner.regr.lightgbm = function(.learner, .task, .subset, .weights = NULL, early.stopping.data = NULL, metric, ...) {
 
   pv = list(...)
   train = getTaskData(.task, .subset, target.extra = TRUE)
   feat.cols = colnames(train$data)[vlapply(train$data, is.factor)]
   prep = lightgbm::lgb.prepare_rules(train$data)
   pv$data = lightgbm::lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
-  if (!is.null(validation.data))
-    pv$valids = list(test = lightgbm::lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
+  if (!is.null(early.stopping.data))
+    pv$valids = list(test = lightgbm::lgb.Dataset.create.valid(pv$data, data.matrix(early.stopping.data$data), label = as.numeric(early.stopping.data$target) - 1))
   pv$metric = coalesce(metric, "")
 
   mod = do.call(lightgbm::lgb.train, pv)

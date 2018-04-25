@@ -11,3 +11,7 @@ getThreshold = function(optim.result) {
 getBestIteration = function(mod) {
   getLearnerModel(mod, more.unwrap = TRUE)$best_iteration
 }
+
+setEarlyStoppingData(base.learner, early.stopping.data) {
+  setHyperPars(base.learner, early.stopping.data = task.test)
+}

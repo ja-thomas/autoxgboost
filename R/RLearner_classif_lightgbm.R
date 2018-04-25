@@ -4,7 +4,7 @@ makeRLearner.classif.lightgbm = function() {
     cl = "classif.lightgbm",
     package = "lightgbm",
     par.set = makeParamSet(
-      makeUntypedLearnerParam("validation.data"),
+      makeUntypedLearnerParam("early.stopping.data"),
       makeIntegerLearnerParam("nrounds", lower = 1, default = 10),
       makeDiscreteLearnerParam("metric", values = c("map", "auc", "binary_logloss", "binary_error", "multi_logloss", "multi_error")),
       makeIntegerLearnerParam("verbose", lower = -1, upper = 1, tunable = FALSE),
@@ -19,7 +19,6 @@ makeRLearner.classif.lightgbm = function() {
       makeIntegerLearnerParam("num_threads", lower = 1),
       makeDiscreteLearnerParam("device", values = c("cpu", "gpu"), default = "cpu"),
       makeIntegerLearnerParam("max_depth", lower = -1, default = -1),
-      makeIntegerLearnerParam("min_data_in_leaf", lower = 1, default = 20),
       makeNumericLearnerParam("min_sum_hessian_in_leaf", lower = 0, default = 1e-3),
       makeNumericLearnerParam("feature_fraction", lower = 0, upper = 1, default = 1),
       makeNumericLearnerParam("bagging_fraction", lower = 0, upper = 1, default = 1),
@@ -29,9 +28,8 @@ makeRLearner.classif.lightgbm = function() {
       makeNumericLearnerParam("min_split_gain", lower = 0, default = 0),
       makeNumericLearnerParam("drop_rate", lower = 0, upper = 1, default = 0.1, requires = quote(boosting == "dart")),
       makeNumericLearnerParam("skip_drop", lower = 0, upper = 1, default = 0.5, requires = quote(boosting == "dart")),
-      makeIntegerLearnerParam("max_drop", lower = 0, default = 50, requires = quote(boosting == "dart")),
+      makeIntegerLearnerParam("max_drop", lower = 1, default = 50, requires = quote(boosting == "dart")),
       makeLogicalLearnerParam("xgboost_dart_mode", default = FALSE),
-      makeIntegerLearnerParam("min_data_per_group", lower = 1, default = 100),
       makeIntegerLearnerParam("max_cat_threshold", lower = 0, default = 32),
       makeNumericLearnerParam("cat_l2", lower = 0, default = 10),
       makeIntegerLearnerParam("max_cat_to_onehot", lower = 0, default = 4)
@@ -44,20 +42,21 @@ makeRLearner.classif.lightgbm = function() {
 }
 
 #' @export
-trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NULL, validation.data = NULL, metric, ...) {
+trainLearner.classif.lightgbm = function(.learner, .task, .subset, .weights = NULL, early.stopping.data = NULL, metric, ...) {
 
   pv = list(...)
   nc = length(getTaskDesc(.task)$class.levels)
   train = getTaskData(.task, .subset, target.extra = TRUE)
   feat.cols = colnames(train$data)[vlapply(train$data, is.factor)]
   prep = lightgbm::lgb.prepare_rules(train$data)
-  pv$data = lightgbm::lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols)
-  if (!is.null(validation.data))
-    pv$valids = list(test = lightgbm::lgb.Dataset.create.valid(pv$data, data.matrix(validation.data$data), label = as.numeric(validation.data$target) - 1))
+  pv$data = lightgbm::lgb.Dataset.construct(lightgbm::lgb.Dataset(data.matrix(prep$data), label = as.numeric(train$target) - 1, categorical_feature = feat.cols))
+  if (!is.null(early.stopping.data))
+    pv$valids = list(test = lightgbm::lgb.Dataset.create.valid(pv$data, data.matrix(early.stopping.data$data), label = as.numeric(early.stopping.data$target) - 1))
   pv$metric = coalesce(metric, "")
 
   if(nc == 2) {
     pv$objective = "binary"
+    pv$num_class = 1
   } else {
     pv$objective = "multiclass"
     pv$num_class = nc
