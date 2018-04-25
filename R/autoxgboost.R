@@ -157,6 +157,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
+      x = x[!vlapply(x, is.na)]
       lrn = setHyperPars(base.learner, par.vals = x)
       mod = train(lrn, task.train)
       pred = predict(mod, task.test)
