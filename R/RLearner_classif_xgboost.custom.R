@@ -4,8 +4,6 @@ makeRLearner.classif.xgboost.custom = function() {
     cl = "classif.xgboost.custom",
     package = "xgboost",
     par.set = makeParamSet(
-      # we pass all of what goes in 'params' directly to ... of xgboost
-      # makeUntypedLearnerParam(id = "params", default = list()),
       makeDiscreteLearnerParam(id = "booster", default = "gbtree", values = c("gbtree", "gblinear", "dart")),
       makeUntypedLearnerParam(id = "watchlist", default = NULL, tunable = FALSE),
       makeNumericLearnerParam(id = "eta", default = 0.3, lower = 0, upper = 1),
@@ -29,7 +27,6 @@ makeRLearner.classif.xgboost.custom = function() {
       makeNumericLearnerParam(id = "tweedie_variance_power", lower = 1, upper = 2, default = 1.5, requires = quote(objective == "reg:tweedie")),
       makeIntegerLearnerParam(id = "nthread", lower = 1L, tunable = FALSE),
       makeIntegerLearnerParam(id = "nrounds", default = 1L, lower = 1L),
-      # FIXME nrounds seems to have no default in xgboost(), if it has 1, par.vals is redundant
       makeUntypedLearnerParam(id = "feval", default = NULL, tunable = FALSE),
       makeIntegerLearnerParam(id = "verbose", default = 1L, lower = 0L, upper = 2L, tunable = FALSE),
       makeIntegerLearnerParam(id = "print_every_n", default = 1L, lower = 1L, tunable = FALSE,

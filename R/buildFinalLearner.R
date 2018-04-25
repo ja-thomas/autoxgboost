@@ -3,7 +3,7 @@ buildFinalLearner = function(optim.result, objective, predict.type = NULL, par.s
 
   nrounds = getBestNrounds(optim.result)
   pars = trafoValue(par.set, optim.result$x)
-
+  pars = pars[!vlapply(pars, is.na)]
   lrn = if (!is.null(predict.type)) {
     makeLearner("classif.xgboost.custom", nrounds = nrounds, objective = objective,
       predict.type = predict.type, predict.threshold = getThreshold(optim.result))

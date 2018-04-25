@@ -23,10 +23,12 @@ print.AutoxgbResult = function(x, ...) {
   catf("Autoxgboost tuning result\n")
   catf("Recommended parameters:")
   for (p in names(pars)) {
-    if (p != "nrounds" && isNumeric(op$par.set$pars[[p]], include.int = FALSE)) {
+    if (p == "nrounds" || isInteger(op$par.set$pars[[p]])) {
+      catf("%s: %i", stringi::stri_pad_left(p, width = 17), as.integer(pars[p]))
+    } else if (isNumeric(op$par.set$pars[[p]], include.int = FALSE)) {
       catf("%s: %.3f", stringi::stri_pad_left(p, width = 17), pars[p])
     } else {
-      catf("%s: %i", stringi::stri_pad_left(p, width = 17), as.integer(pars[p]))
+      catf("%s: %s", stringi::stri_pad_left(p, width = 17), pars[p])
     }
   }
 

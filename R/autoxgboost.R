@@ -113,7 +113,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
     }
 
     base.learner = makeLearner("classif.xgboost.earlystop", id = "classif.xgboost.earlystop", predict.type = predict.type,
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
+      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds, maximize = !measure$minimize,
       max.nrounds = max.nrounds, par.vals = pv)
 
   } else if (tt == "regr") {
@@ -122,7 +122,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
     eval_metric = "rmse"
 
     base.learner = makeLearner("regr.xgboost.earlystop", id = "regr.xgboost.earlystop",
-      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds,
+      eval_metric = eval_metric, objective = objective, early_stopping_rounds = early.stopping.rounds, maximize = !measure$minimize,
       max.nrounds = max.nrounds, par.vals = pv)
 
   } else {
@@ -157,6 +157,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
+      x = x[!vlapply(x, is.na)]
       lrn = setHyperPars(base.learner, par.vals = x)
       mod = train(lrn, task.train)
       pred = predict(mod, task.test)
