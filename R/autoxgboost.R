@@ -37,8 +37,8 @@
 #'   Default is \code{4/5}.
 #' @param design.size [\code{integer(1)}]\cr
 #'   Size of the initial design. Default is \code{15L}.
-#' @param impact.encoding.boundary [\code{integer(1)}]\cr
-#'   Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+#' @param upper.impact.encoding.boundary [\code{integer(1)}]\cr
+#'   Defines the upper bound for tuning the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
 #'   For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = .Machine$integer.max}, all of them get dummy encoded.
 #'   Default is \code{10}.
 #' @param mbo.learner [\code{\link[mlr]{Learner}}]\cr
@@ -62,7 +62,7 @@
 #' }
 autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, time.budget = 3600L,
   par.set = NULL, max.nrounds = 10^6, early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
-  build.final.model = TRUE, design.size = 15L, impact.encoding.boundary = 10L, mbo.learner = NULL,
+  build.final.model = TRUE, design.size = 15L, upper.impact.encoding.boundary = 10L, mbo.learner = NULL,
   nthread = NULL, tune.threshold = TRUE) {
 
 
@@ -78,7 +78,7 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
   assertNumeric(early.stopping.fraction, lower = 0, upper = 1, len = 1L)
   assertFlag(build.final.model)
   assertIntegerish(design.size, lower = 1L, len = 1L)
-  assertIntegerish(impact.encoding.boundary, lower = 0, len = 1L)
+  assertIntegerish(upper.impact.encoding.boundary, lower = 0, len = 1L)
   assertIntegerish(nthread, lower = 1, len = 1L, null.ok = TRUE)
   assertFlag(tune.threshold)
 
@@ -129,36 +129,39 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
     stop("Task must be regression or classification")
   }
 
-  # Create pipeline
 
-  preproc.pipeline = NULLCPO
 
-  #if (!is.null(task$feature.information$timestamps))
-  #  preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = unlist(task$feature.information$timestamps))
   if (has.cat.feats) {
-    preproc.pipeline %<>>% generateCatFeatPipeline(task, impact.encoding.boundary)
+    par.set = c(par.set, makeParamSet(makeIntegerParam("impact.encoding.boundary", lower = 1, upper = upper.impact.encoding.boundary)))
   }
-
-  preproc.pipeline %<>>% cpoDropConstants()
-
-
-  # process data and apply pipeline
 
   # split early stopping data
   rinst = makeResampleInstance(makeResampleDesc("Holdout", split = early.stopping.fraction), task)
   task.test = subsetTask(task, rinst$test.inds[[1]])
   task.train = subsetTask(task, rinst$train.inds[[1]])
 
-  task.train %<>>% preproc.pipeline
-  task.test %<>>% retrafo(task.train)
-  base.learner = setHyperPars(base.learner, early.stopping.data = task.test)
-
   # Optimize
 
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
+
+      # Create pipeline
+
+      preproc.pipeline = NULLCPO
+
+      #if (!is.null(task$feature.information$timestamps))
+      #  preproc.pipeline %<>>% cpoExtractTimeStampInformation(affect.names = unlist(task$feature.information$timestamps))
+      if (has.cat.feats) {
+        preproc.pipeline %<>>% generateCatFeatPipeline(task, x$impact.encoding.boundary)
+        x$impact.encoding.boundary = NULL
+      }
+
+      preproc.pipeline %<>>% cpoDropConstants()
+      task.train %<>>% preproc.pipeline
+      task.test %<>>% retrafo(task.train)
+
       x = x[!vlapply(x, is.na)]
-      lrn = setHyperPars(base.learner, par.vals = x)
+      lrn = setHyperPars(base.learner, early.stopping.data = task.test, par.vals = x)
       mod = train(lrn, task.train)
       pred = predict(mod, task.test)
       nrounds = getBestIteration(mod)
@@ -181,6 +184,13 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   optim.result = mbo(fun = opt, control = control, design = des, learner = mbo.learner)
 
+  preproc.pipeline = NULLCPO
+
+  if (has.cat.feats) {
+    preproc.pipeline %<>>% generateCatFeatPipeline(task, optim.result$x$impact.encoding.boundary)
+  }
+
+  preproc.pipeline %<>>% cpoDropConstants()
 
   lrn = buildFinalLearner(optim.result, objective, predict.type, par.set = par.set, preproc.pipeline = preproc.pipeline)
 

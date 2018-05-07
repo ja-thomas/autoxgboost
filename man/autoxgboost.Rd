@@ -8,8 +8,8 @@ autoxgboost(task, measure = NULL, control = NULL, iterations = 160L,
   time.budget = 3600L, par.set = NULL, max.nrounds = 10^6,
   early.stopping.rounds = 10L, early.stopping.fraction = 4/5,
   build.final.model = TRUE, design.size = 15L,
-  impact.encoding.boundary = 10L, mbo.learner = NULL, nthread = NULL,
-  tune.threshold = TRUE)
+  upper.impact.encoding.boundary = 10L, mbo.learner = NULL,
+  nthread = NULL, tune.threshold = TRUE)
 }
 \arguments{
 \item{task}{[\code{\link[mlr]{Task}}]\cr
@@ -52,8 +52,8 @@ Default is \code{FALSE}.}
 \item{design.size}{[\code{integer(1)}]\cr
 Size of the initial design. Default is \code{15L}.}
 
-\item{impact.encoding.boundary}{[\code{integer(1)}]\cr
-Defines the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
+\item{upper.impact.encoding.boundary}{[\code{integer(1)}]\cr
+Defines the upper bound for tuning the threshold on how factor variables are handled. Factors with more levels than the \code{"impact.encoding.boundary"} get impact encoded while factor variables with less or equal levels than the \code{"impact.encoding.boundary"} get dummy encoded.
 For \code{impact.encoding.boundary = 0L}, all factor variables get impact encoded while for \code{impact.encoding.boundary = .Machine$integer.max}, all of them get dummy encoded.
 Default is \code{10}.}
 
