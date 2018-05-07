@@ -137,16 +137,14 @@ autoxgboost = function(task, measure = NULL, control = NULL, iterations = 160L, 
 
   # split early stopping data
   rinst = makeResampleInstance(makeResampleDesc("Holdout", split = early.stopping.fraction), task)
-  task.test = subsetTask(task, rinst$test.inds[[1]])
-  task.train = subsetTask(task, rinst$train.inds[[1]])
 
   # Optimize
-
   opt = smoof::makeSingleObjectiveFunction(name = "optimizeWrapper",
     fn = function(x) {
 
+      task.test = subsetTask(task, rinst$test.inds[[1]])
+      task.train = subsetTask(task, rinst$train.inds[[1]])
       # Create pipeline
-
       preproc.pipeline = NULLCPO
 
       #if (!is.null(task$feature.information$timestamps))
