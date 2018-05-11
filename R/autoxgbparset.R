@@ -31,7 +31,7 @@ autoxgbparset = makeParamSet(
 )
 
 autoxgbparset.mixed = makeParamSet(
-  makeDiscreteParam("booster", values = c("gbtree", "gblinear", "dart")),
+  makeDiscreteParam("booster", values = c("gbtree", "dart")),
   makeDiscreteParam("sample_type", values = c("uniform", "weighted"), requires = quote(booster == "dart")),
   makeDiscreteParam("normalize_type", values = c("tree", "forest"), requires = quote(booster == "dart")),
   makeNumericParam("rate_drop", lower = 0, upper = 1, requires = quote(booster == "dart")),
