@@ -23,24 +23,24 @@ and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrM
 # A first small benchmark
 
 
-**Name**            **Factors**   **Numerics**   **Classes**   **Train instances**   **Test instances**
------------------ ------------- -------------- ------------- --------------------- --------------------
-Dexter                   20 000              0             2                   420                  180
-GermanCredit                 13              7             2                   700                  300
-Dorothea                100 000              0             2                   805                  345
-Yeast                         0              8            10                 1 038                  446
-Amazon                   10 000              0            49                 1 050                  450
-Secom                         0            591             2                 1 096                  471
-Semeion                     256              0            10                 1 115                  478
-Car                           6              0             4                 1 209                  519
-Madelon                     500              0             2                 1 820                  780
-KR-vs-KP                     37              0             2                 2 237                  959
-Abalone                       1              7            28                 2 923                1 254
-Wine Quality                  0             11            11                 3 425                1 469
-Waveform                      0             40             3                 3 500                1 500
-Gisette                   5 000              0             2                 4 900                2 100
-Convex                        0            784             2                 8 000               50 000
-Rot. MNIST + BI               0            784            10                12 000               50 000
+|**Name**         |  **Factors**|  **Numerics**|  **Classes**|  **Train instances**|  **Test instances**
+|-----------------|-------------|--------------|-------------|---------------------|--------------------
+|Dexter           |       20 000|             0|            2|                  420|                 180
+|GermanCredit     |           13|             7|            2|                  700|                 300
+|Dorothea         |      100 000|             0|            2|                  805|                 345
+|Yeast            |            0|             8|           10|                1 038|                 446
+|Amazon           |       10 000|             0|           49|                1 050|                 450
+|Secom            |            0|           591|            2|                1 096|                 471
+|Semeion          |          256|             0|           10|                1 115|                 478
+|Car              |            6|             0|            4|                1 209|                 519
+|Madelon          |          500|             0|            2|                1 820|                 780
+|KR-vs-KP         |           37|             0|            2|                2 237|                 959
+|Abalone          |            1|             7|           28|                2 923|               1 254
+|Wine Quality     |            0|            11|           11|                3 425|               1 469
+|Waveform         |            0|            40|            3|                3 500|               1 500
+|Gisette          |        5 000|             0|            2|                4 900|               2 100
+|Convex           |            0|           784|            2|                8 000|              50 000
+|Rot. MNIST + BI  |            0|           784|           10|               12 000|              50 000
 
 Datasets used for the comparison benchmark of autoxgboost, Auto-WEKA and auto-sklearn.
 
