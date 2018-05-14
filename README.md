@@ -22,6 +22,7 @@ and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrM
 
 # A first small benchmark
 
+
 **Name**            **Factors**   **Numerics**   **Classes**   **Train instances**   **Test instances**
 ----------------- ------------- -------------- ------------- --------------------- --------------------
 Dexter                   20 000              0             2                   420                  180
@@ -40,9 +41,8 @@ Waveform                      0             40             3                 3 5
 Gisette                   5 000              0             2                 4 900                2 100
 Convex                        0            784             2                 8 000               50 000
 Rot. MNIST + BI               0            784            10                12 000               50 000
-: Datasets used for the comparison benchmark of autoxgboost, Auto-WEKA
-and auto-sklearn.
 
+Datasets used for the comparison benchmark of autoxgboost, Auto-WEKA and auto-sklearn.
 
 
 
@@ -64,7 +64,6 @@ Waveform                            68.80                    15.40   <span>**14.
 Gisette                             50.71                     2.48                     2.24    <span>**1.62**</span>
 Convex                              50.00                    22.74                    22.05   <span>**17.53**</span>
 Rot. MNIST + BI                     88.88                    47.09                    55.84   <span>**46.92**</span>
-: Benchmark results are median percent error across 100 000 bootstrap
-samples (out of 25 runs) simulating 4 parallel runs. Bold numbers
-indicate best performing algorithms.
+
+Benchmark results are median percent error across 100 000 bootstrap samples (out of 25 runs) simulating 4 parallel runs. Bold numbers indicate best performing algorithms.
 
