@@ -46,24 +46,24 @@ Datasets used for the comparison benchmark of autoxgboost, Auto-WEKA and auto-sk
 
 
 
-**Dataset**                  **baseline**          **autoxgboost**            **Auto-WEKA**         **auto-sklearn**
------------------ ----------------------- ------------------------ ------------------------ ------------------------
-Dexter                              52,78                    12.22                     7.22    <span>**5.56**</span>
-GermanCredit                        32.67                    27.67                    28.33   <span>**27.00**</span>
-Dorothea                             6.09    <span>**5.22**</span>                     6.38                     5.51
-Yeast                               68.99   <span>**38.88**</span>                    40.45                    40.67
-Amazon                              99.33                    26.22                    37.56   <span>**16.00**</span>
-Secom               <span>**7.87**</span>    <span>**7.87**</span>    <span>**7.87**</span>    <span>**7.87**</span>
-Semeion                             92.45                     8.38    <span>**5.03**</span>                     5.24
-Car                                 29,15                     1.16                     0.58    <span>**0.39**</span>
-Madelon                             50.26                    16.54                    21.15   <span>**12.44**</span>
-KR-vs-KP                            48.96                     1.67    <span>**0.31**</span>                     0.42
-Abalone                             84.04                    73.75   <span>**73.02**</span>                    73.50
-Wine Quality                        55.68   <span>**33.70**</span>   <span>**33.70**</span>                    33.76
-Waveform                            68.80                    15.40   <span>**14.40**</span>                    14.93
-Gisette                             50.71                     2.48                     2.24    <span>**1.62**</span>
-Convex                              50.00                    22.74                    22.05   <span>**17.53**</span>
-Rot. MNIST + BI                     88.88                    47.09                    55.84   <span>**46.92**</span>
+|**Dataset**      |           **baseline**|         **autoxgboost**|           **Auto-WEKA**|        **auto-sklearn**
+|-----------------|-----------------------|------------------------|------------------------|------------------------
+|Dexter           |                  52,78|                   12.22|                    7.22|   <span>**5.56**</span>
+|GermanCredit     |                  32.67|                   27.67|                   28.33|  <span>**27.00**</span>
+|Dorothea         |                   6.09|   <span>**5.22**</span>|                    6.38|                    5.51
+|Yeast            |                  68.99|  <span>**38.88**</span>|                   40.45|                   40.67
+|Amazon           |                  99.33|                   26.22|                   37.56|  <span>**16.00**</span>
+|Secom            |  <span>**7.87**</span>|   <span>**7.87**</span>|   <span>**7.87**</span>|   <span>**7.87**</span>
+|Semeion          |                  92.45|                    8.38|   <span>**5.03**</span>|                    5.24
+|Car              |                  29,15|                    1.16|                    0.58|   <span>**0.39**</span>
+|Madelon          |                  50.26|                   16.54|                   21.15|  <span>**12.44**</span>
+|KR-vs-KP         |                  48.96|                    1.67|   <span>**0.31**</span>|                    0.42
+|Abalone          |                  84.04|                   73.75|  <span>**73.02**</span>|                   73.50
+|Wine Quality     |                  55.68|  <span>**33.70**</span>|  <span>**33.70**</span>|                   33.76
+|Waveform         |                  68.80|                   15.40|  <span>**14.40**</span>|                   14.93
+|Gisette          |                  50.71|                    2.48|                    2.24|   <span>**1.62**</span>
+|Convex           |                  50.00|                   22.74|                   22.05|  <span>**17.53**</span>
+|Rot. MNIST + BI  |                  88.88|                   47.09|                   55.84|  <span>**46.92**</span>
 
 Benchmark results are median percent error across 100 000 bootstrap samples (out of 25 runs) simulating 4 parallel runs. Bold numbers indicate best performing algorithms.
 
