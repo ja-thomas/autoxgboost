@@ -25,6 +25,8 @@ and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrM
 The automatic gradient boosting framework is presented at the [ICML/IJCAI-ECAI 2018 AutoML Workshop](https://sites.google.com/site/automl2018icml/accepted-papers) ([paper](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxhdXRvbWwyMDE4aWNtbHxneDoyYzdhNGMxZDY3NzNkMWI1), [poster](poster_2018.pdf))
 
 
+# Benchmark
+
 |**Name**         |  **Factors**|  **Numerics**|  **Classes**|  **Train instances**|  **Test instances**
 |-----------------|-------------|--------------|-------------|---------------------|--------------------
 |Dexter           |       20 000|             0|            2|                  420|                 180
