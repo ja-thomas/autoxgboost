@@ -17,10 +17,12 @@
 autoxgboost aims to find an optimal [xgboost](https://github.com/dmlc/xgboost) model automatically using the machine learning framework [mlr](https://github.com/mlr-org/mlr)
 and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrMBO).
 
-**Work in progress**! This is a very early version, so a lot can change in the future.
+**Work in progress**!
 
 
-# A first small benchmark
+# Publication
+
+The automatic gradient boosting framework is presented at the [ICML/IJCAI-ECAI 2018 AutoML Workshop](https://sites.google.com/site/automl2018icml/accepted-papers) ([paper](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxhdXRvbWwyMDE4aWNtbHxneDoyYzdhNGMxZDY3NzNkMWI1), [poster](poster_2018.pdf))
 
 
 |**Name**         |  **Factors**|  **Numerics**|  **Classes**|  **Train instances**|  **Test instances**
