@@ -19,12 +19,6 @@ and the bayesian optimization framework [mlrMBO](https://github.com/mlr-org/mlrM
 
 **Work in progress**!
 
-
-# Publication
-
-The **Automatic Gradient Boosting** framework is presented at the [ICML/IJCAI-ECAI 2018 AutoML Workshop](https://sites.google.com/site/automl2018icml/accepted-papers) ([paper](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxhdXRvbWwyMDE4aWNtbHxneDoyYzdhNGMxZDY3NzNkMWI1), [poster](poster_2018.pdf))
-
-
 # Benchmark
 
 |**Name**         |  **Factors**|  **Numerics**|  **Classes**|  **Train instances**|  **Test instances**
@@ -73,7 +67,8 @@ Benchmark results are median percent error across 100 000 bootstrap samples (out
 
 # autoxgboost - How to Cite and Citing Publications
 
-Please cite our [ICML AutoML workshop paper](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxhdXRvbWwyMDE4aWNtbHxneDoyYzdhNGMxZDY3NzNkMWI1).
+The **Automatic Gradient Boosting** framework was presented at the [ICML/IJCAI-ECAI 2018 AutoML Workshop](https://sites.google.com/site/automl2018icml/accepted-papers) ([poster](poster_2018.pdf))
+Please cite our [ICML AutoML workshop paper on arxiv](https://arxiv.org/abs/1807.03873v2).
 You can get citation info via `citation("autoxgboost")` or copy the following BibTex entry:
 
 ```bibtex
