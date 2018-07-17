@@ -67,7 +67,7 @@ Benchmark results are median percent error across 100 000 bootstrap samples (out
 
 # autoxgboost - How to Cite and Citing Publications
 
-The **Automatic Gradient Boosting** framework was presented at the [ICML/IJCAI-ECAI 2018 AutoML Workshop](https://sites.google.com/site/automl2018icml/accepted-papers) ([poster](poster_2018.pdf))
+The **Automatic Gradient Boosting** framework was presented at the [ICML/IJCAI-ECAI 2018 AutoML Workshop](https://sites.google.com/site/automl2018icml/accepted-papers) ([poster](poster_2018.pdf)).  
 Please cite our [ICML AutoML workshop paper on arxiv](https://arxiv.org/abs/1807.03873v2).
 You can get citation info via `citation("autoxgboost")` or copy the following BibTex entry:
 
