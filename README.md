@@ -71,3 +71,22 @@ Datasets used for the comparison benchmark of autoxgboost, Auto-WEKA and auto-sk
 
 Benchmark results are median percent error across 100 000 bootstrap samples (out of 25 runs) simulating 4 parallel runs. Bold numbers indicate best performing algorithms.
 
+# autoxgboost - How to Cite and Citing Publications
+
+Please cite our [ICML AutoML workshop paper](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxhdXRvbWwyMDE4aWNtbHxneDoyYzdhNGMxZDY3NzNkMWI1).
+You can get citation info via `citation("autoxgboost")` or copy the following BibTex entry:
+
+```bibtex
+@ARTICLE{2018arXiv180703873T,
+   author = {{Thomas}, Janek and {Coors}, Stefab and {Bischl}, Bernd},
+    title = "{Automatic Gradient Boosting}",
+    url = {http://arxiv.org/abs/1807.03873v2},
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1807.03873},
+ primaryClass = "stat.ML",
+ keywords = {Statistics - Machine Learning, Computer Science - Machine Learning},
+     year = 2018,
+    month = jul
+}
+```
