@@ -1,11 +1,11 @@
 bibentry(
-  bibtype = "Article",
+  bibtype = "Manual",
   key = "autoxgboost",
   title = "Automatic Gradient Boosting",
   author = c(
     person("Janek", "Thomas"),
-    person("Stefan", "Coors")
-    person("Bernd", "Bischl"),
+    person("Stefan", "Coors"),
+    person("Bernd", "Bischl")
   ),
   year = "2018",
   url = "http://arxiv.org/abs/1807.03873v2"
