@@ -1,3 +1,4 @@
+<img align="right" src="https://raw.githubusercontent.com/ja-thomas/autoxgboost/master/man/figures/hexagon.svg?sanitize=true" width="125px">
 # autoxgboost - Automatic tuning and fitting of [xgboost](https://github.com/dmlc/xgboost).
 
 [![Build Status](https://travis-ci.org/ja-thomas/autoxgboost.svg?branch=master)](https://travis-ci.org/ja-thomas/autoxgboost)
