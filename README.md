@@ -75,15 +75,10 @@ Please cite our [ICML AutoML workshop paper on arxiv](https://arxiv.org/abs/1807
 You can get citation info via `citation("autoxgboost")` or copy the following BibTex entry:
 
 ```bibtex
-@article{autoxgboost,
-  title = {Automatic Gradient Boosting},
-  url = {https://arxiv.org/abs/1807.03873v2},
-  shorttitle = {{{autoxgboost}}},
-  archivePrefix = {arXiv},
-  eprinttype = {arxiv},
-  eprint = {1807.03873v2},
-  primaryClass = {stat.ML},
-  author = {Thomas, Janek and Coors, Stefan and Bischl, Bernd},
-  date = {2017-07-13},
+@inproceedings{autoxgboost,
+  title={Automatic Gradient Boosting},
+  author={Thomas, Janek and Coors, Stefan and Bischl, Bernd},
+  booktitle={International Workshop on Automatic Machine Learning at ICML},
+  year={2018}
 }
 ```
