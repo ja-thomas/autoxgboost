@@ -19,7 +19,7 @@ generateCatFeatPipeline = function(task, impact.encoding.boundary) {
   dummy.cols = setdiff(feat.cols, impact.cols)
 
   if (length(dummy.cols) > 0L)
-      cat.pipeline %<>>% cpoDummyEncode(affect.names = dummy.cols)
+      cat.pipeline %<>>% cpoDummyEncode(affect.names = dummy.cols, infixdot = TRUE)
   if (length(impact.cols) > 0L) {
     if (getTaskType(task) == "classif") {
       cat.pipeline %<>>% cpoImpactEncodeClassif(affect.names = impact.cols)
